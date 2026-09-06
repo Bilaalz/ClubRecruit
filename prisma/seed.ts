@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import "dotenv/config";
+import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import {
@@ -10,6 +11,9 @@ import {
 } from "./seed/sample-content";
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
+
+/** Shared password for every seeded account. Shown on the login page. */
+const DEMO_PASSWORD = "clubrecruit";
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000);
 const daysFromNow = (n: number) => new Date(Date.now() + n * 86_400_000);
@@ -23,6 +27,7 @@ async function reset() {
   await db.membership.deleteMany();
   await db.subteam.deleteMany();
   await db.club.deleteMany();
+  await db.session.deleteMany();
   await db.user.deleteMany();
   await db.university.deleteMany();
 }
@@ -37,8 +42,10 @@ async function main() {
   });
 
   // ── Users ──────────────────────────────────────────────────
+  // Hash once and reuse: bcrypt is deliberately slow, and every demo account shares the password.
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
   const mk = (email: string, name: string, program: string, year: number, bio?: string) =>
-    db.user.create({ data: { email, name, program, year, bio, universityId: uoft.id } });
+    db.user.create({ data: { email, name, program, year, bio, passwordHash, universityId: uoft.id } });
 
   const priya = await mk("priya@utoronto.ca", "Priya Sharma", "Engineering Science", 4, "President, UofT Robotics Association.");
   const marcus = await mk("marcus@utoronto.ca", "Marcus Lee", "Computer Science", 3, "Software lead. ROS 2, perception, too much coffee.");
@@ -527,7 +534,12 @@ async function main() {
   await task("Onboard new software recruits", "TODO", null, mMarcus.id, "MEDIUM", 7, "Set up Jetson dev images and the ROS 2 workspace for the incoming cohort.");
 
   console.log("Seeded ✓");
-  console.log("Personas: priya@utoronto.ca (owner), marcus@utoronto.ca (lead), aisha@mail.utoronto.ca (applicant), newstudent@mail.utoronto.ca (student)");
+  console.log("");
+  console.log(`Demo accounts (password for all: "${DEMO_PASSWORD}")`);
+  console.log("  priya@utoronto.ca            club owner (UofT Robotics Association)");
+  console.log("  marcus@utoronto.ca           software lead");
+  console.log("  aisha@mail.utoronto.ca       applicant");
+  console.log("  newstudent@mail.utoronto.ca  new student, no clubs");
 }
 
 main()

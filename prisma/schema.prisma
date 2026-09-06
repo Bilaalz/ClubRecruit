@@ -79,13 +79,25 @@ model User {
   program      String?  // e.g. "Computer Science"
   year         Int?     // 1..5
   bio          String?
-  passwordHash String?  // set in Stage 7
+  passwordHash String?  // bcrypt hash; null only for legacy rows
   universityId String
   university   University @relation(fields: [universityId], references: [id])
 
   memberships  Membership[]
   applications Application[]
+  sessions     Session[]
   createdAt    DateTime @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // ───────────────────────── Clubs ─────────────────────────
