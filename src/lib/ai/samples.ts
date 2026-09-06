@@ -172,6 +172,23 @@ export type SampleResumeKey = keyof typeof SAMPLE_RESUMES;
 export type SampleAnswerKey = keyof typeof SAMPLE_ANSWERS;
 
 /** Pick a sample resume by the posting's subteam name (Software → software, etc.). */
+/**
+ * The sample resumes carry a fictional name/email on their first two lines.
+ * Swap those for the person actually applying so Taylor doesn't see "AISHA RAHMAN".
+ */
+export function personaliseResume(text: string, user: { name: string; email: string }): string {
+  const lines = text.split("\n");
+  if (lines.length === 0) return text;
+  lines[0] = user.name.toUpperCase();
+  if (lines.length > 1) {
+    // Second line is "email · City, Province · links…". Keep plain segments (the city),
+    // drop anything that is an email, URL or handle belonging to the sample person.
+    const rest = lines[1].split(" · ").filter((seg) => !/[@/]/.test(seg));
+    lines[1] = [user.email, ...rest].join(" · ");
+  }
+  return lines.join("\n");
+}
+
 export function sampleResumeForSubteam(subteamName: string | null | undefined): string {
   const key = (subteamName ?? "").trim().toLowerCase();
   return SAMPLE_RESUMES[key] ?? SAMPLE_RESUMES.generic;

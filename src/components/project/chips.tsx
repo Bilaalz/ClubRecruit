@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { WorkstreamStatus } from "@/generated/prisma/enums";
-import { FALLBACK_SUBTEAM_COLOR, STATUS_LABEL, STATUS_TONE, percent } from "./shared";
+import { workstreamStatusTone } from "@/lib/status";
+import { FALLBACK_SUBTEAM_COLOR, STATUS_LABEL, percent } from "./shared";
 
 /** Small outline chip in the subteam's colour. Hook-free, so usable on server and client. */
 export function SubteamChip({
@@ -26,7 +27,7 @@ export function SubteamChip({
 
 export function StatusBadge({ status, className }: { status: WorkstreamStatus; className?: string }) {
   return (
-    <Badge tone={STATUS_TONE[status]} className={className}>
+    <Badge tone={workstreamStatusTone[status]} className={className}>
       {STATUS_LABEL[status]}
     </Badge>
   );

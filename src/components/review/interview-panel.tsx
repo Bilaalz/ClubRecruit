@@ -1,6 +1,7 @@
 import { Card, CardBody, CardHeader, CardTitle, EmptyState } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { formatClock, formatDate, parseTranscript, type ReviewApplication } from "@/lib/review";
+import { formatClock, formatDate, type ReviewApplication } from "@/lib/review";
+import { parseTranscript } from "@/lib/transcript";
 
 export function InterviewPanel({ application }: { application: ReviewApplication }) {
   const interview = application.interview;

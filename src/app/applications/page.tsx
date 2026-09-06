@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
-import { applicationStatusLabel, applicationStatusTone, formatDate, listMyApplications } from "@/lib/applications";
+import { formatDate, listMyApplications } from "@/lib/applications";
+import { applicationStatusTone, labelFor } from "@/lib/status";
 import { Badge, ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 
 export const metadata = { title: "My applications" };
@@ -44,7 +45,7 @@ export default async function ApplicationsPage() {
                   <div className="mt-1 text-xs text-ink-4">Submitted {formatDate(a.createdAt)}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <Badge tone={applicationStatusTone(a.status)}>{applicationStatusLabel(a.status)}</Badge>
+                  <Badge tone={applicationStatusTone[a.status]}>{labelFor(a.status)}</Badge>
                   <span className="text-ink-4 transition-transform group-hover:translate-x-0.5" aria-hidden>
                     →
                   </span>

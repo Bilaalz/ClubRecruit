@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button, Label, Select } from "@/components/ui";
-import { labelFor, STATUS_ORDER, type PipelineSort } from "@/lib/review";
+import { STATUS_ORDER, type PipelineSort } from "@/lib/review";
+import { labelFor } from "@/lib/status";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
 
 type PostingOption = { id: string; title: string; status: string };

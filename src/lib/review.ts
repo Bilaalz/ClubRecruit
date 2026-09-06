@@ -1,28 +1,12 @@
 import { db } from "@/lib/db";
-import type { BadgeTone } from "@/components/ui/badge";
-import { ApplicationStatus, type Recommendation } from "@/generated/prisma/enums";
+import { ApplicationStatus } from "@/generated/prisma/enums";
 
 /*
  * Stage 5 — review pipeline queries and presentation helpers.
- * Tones are defined locally for now; Stage 8 consolidates with src/lib/status.ts.
+ * Badge tones and labels live in src/lib/status.ts; Json guards in src/lib/transcript.ts.
  */
 
-// ───────────────────────── Tones & labels ─────────────────────────
-
-export const statusTone: Record<ApplicationStatus, BadgeTone> = {
-  SUBMITTED: "neutral",
-  INTERVIEW_COMPLETE: "warn",
-  UNDER_REVIEW: "ink",
-  ACCEPTED: "ok",
-  REJECTED: "bad",
-};
-
-export const recommendationTone: Record<Recommendation, BadgeTone> = {
-  STRONG_YES: "ok",
-  YES: "ok",
-  MAYBE: "warn",
-  NO: "bad",
-};
+// ───────────────────────── Status order ─────────────────────────
 
 export const STATUS_ORDER: ApplicationStatus[] = [
   "SUBMITTED",
@@ -31,12 +15,6 @@ export const STATUS_ORDER: ApplicationStatus[] = [
   "ACCEPTED",
   "REJECTED",
 ];
-
-/** `UNDER_REVIEW` → `Under review`. */
-export function labelFor(value: string) {
-  const words = value.toLowerCase().split("_");
-  return words.map((w, i) => (i === 0 ? w.charAt(0).toUpperCase() + w.slice(1) : w)).join(" ");
-}
 
 export function isApplicationStatus(value: unknown): value is ApplicationStatus {
   return typeof value === "string" && value in ApplicationStatus;
@@ -82,33 +60,6 @@ export function formatClock(totalSec: number) {
   const m = Math.floor(totalSec / 60);
   const s = Math.max(0, Math.round(totalSec - m * 60));
   return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-// ───────────────────────── Json shapes ─────────────────────────
-
-export type TranscriptTurn = { speaker: "Interviewer" | "Candidate"; text: string; atSec: number };
-export type RubricRow = { criterion: string; score: number; note: string };
-
-export function parseTranscript(json: unknown): TranscriptTurn[] {
-  if (!Array.isArray(json)) return [];
-  return json.flatMap((t) => {
-    if (!t || typeof t !== "object") return [];
-    const o = t as Record<string, unknown>;
-    const speaker = o.speaker === "Candidate" ? "Candidate" : "Interviewer";
-    if (typeof o.text !== "string") return [];
-    return [{ speaker, text: o.text, atSec: typeof o.atSec === "number" ? o.atSec : 0 }];
-  });
-}
-
-export function parseRubric(json: unknown): RubricRow[] {
-  if (!Array.isArray(json)) return [];
-  return json.flatMap((r) => {
-    if (!r || typeof r !== "object") return [];
-    const o = r as Record<string, unknown>;
-    if (typeof o.criterion !== "string") return [];
-    const score = typeof o.score === "number" ? Math.min(5, Math.max(0, Math.round(o.score))) : 0;
-    return [{ criterion: o.criterion, score, note: typeof o.note === "string" ? o.note : "" }];
-  });
 }
 
 // ───────────────────────── Queries ─────────────────────────

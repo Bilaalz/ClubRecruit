@@ -1,4 +1,3 @@
-import type { BadgeTone } from "@/components/ui";
 import type { WorkstreamStatus } from "@/generated/prisma/enums";
 
 /**
@@ -13,14 +12,6 @@ export const STATUS_LABEL: Record<WorkstreamStatus, string> = {
   ACTIVE: "Active",
   BLOCKED: "Blocked",
   DONE: "Done",
-};
-
-/** Local badge tones for workstream status; Stage 8 consolidates into src/lib/status.ts. */
-export const STATUS_TONE: Record<WorkstreamStatus, BadgeTone> = {
-  PLANNED: "outline",
-  ACTIVE: "ink",
-  BLOCKED: "warn",
-  DONE: "ok",
 };
 
 export const FALLBACK_SUBTEAM_COLOR = "#8a867e";

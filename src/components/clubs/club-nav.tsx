@@ -10,7 +10,7 @@ export type ClubNavItem = { href: string; label: string; exact?: boolean };
 export function ClubNav({ items }: { items: ClubNavItem[] }) {
   const pathname = usePathname();
   return (
-    <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Club sections">
+    <nav className="-mb-px flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Club sections">
       {items.map((item) => {
         const active = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/");
         return (

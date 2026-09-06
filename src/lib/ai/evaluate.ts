@@ -2,7 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { db } from "@/lib/db";
 import type { Prisma } from "@/generated/prisma/client";
-import { RUBRIC_CRITERIA, type TranscriptTurn } from "./samples";
+import { RUBRIC_CRITERIA } from "./samples";
+import { parseTranscript } from "@/lib/transcript";
 import { EvaluationResultSchema, type EvaluationInput, type EvaluationResult } from "./schema";
 import { mockEvaluate, MOCK_MODEL } from "./mock";
 
@@ -143,15 +144,4 @@ function normaliseRubric(result: EvaluationResult): EvaluationResult {
     return { criterion, score: row?.score ?? 3, note: row?.note ?? "" };
   });
   return { ...result, rubric };
-}
-
-export function parseTranscript(json: unknown): TranscriptTurn[] {
-  if (!Array.isArray(json)) return [];
-  return json
-    .filter((t): t is TranscriptTurn => !!t && typeof t === "object" && typeof (t as TranscriptTurn).text === "string")
-    .map((t) => ({
-      speaker: t.speaker === "Interviewer" ? "Interviewer" : "Candidate",
-      text: t.text,
-      atSec: typeof t.atSec === "number" ? t.atSec : 0,
-    }));
 }

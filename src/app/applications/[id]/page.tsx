@@ -1,16 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import {
-  APPLICATION_STEPS,
-  applicationStatusLabel,
-  applicationStatusTone,
-  applicationStepIndex,
-  formatBytes,
-  formatDate,
-  formatDuration,
-  getMyApplication,
-} from "@/lib/applications";
+import { APPLICATION_STEPS, applicationStepIndex, formatBytes, formatDate, formatDuration, getMyApplication } from "@/lib/applications";
+import { applicationStatusTone, labelFor } from "@/lib/status";
 import { Badge, Button, ButtonLink, Card, CardBody, CardHeader, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -44,7 +36,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
           <p className="mt-2 text-sm text-ink-3">Submitted {formatDate(app.createdAt)}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge tone={applicationStatusTone(app.status)}>{applicationStatusLabel(app.status)}</Badge>
+          <Badge tone={applicationStatusTone[app.status]}>{labelFor(app.status)}</Badge>
           <ButtonLink href={`/postings/${app.posting.id}`} variant="secondary" size="sm">
             View posting
           </ButtonLink>

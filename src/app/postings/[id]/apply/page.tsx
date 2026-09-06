@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { findApplication, getPostingForApply } from "@/lib/applications";
-import { sampleResumeForSubteam } from "@/lib/ai/samples";
+import { personaliseResume, sampleResumeForSubteam } from "@/lib/ai/samples";
 import { ApplyContext, ApplySteps } from "@/components/apply/steps";
 import { ResumeForm } from "@/components/apply/resume-form";
 import { ButtonLink, EmptyState } from "@/components/ui";
@@ -46,7 +46,7 @@ export default async function ApplyPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="mt-8 grid gap-10 md:grid-cols-[1fr_220px]">
-        <ResumeForm postingId={posting.id} sampleResume={sampleResumeForSubteam(posting.subteam?.name)} applicantName={user.name} />
+        <ResumeForm postingId={posting.id} sampleResume={personaliseResume(sampleResumeForSubteam(posting.subteam?.name), user)} applicantName={user.name} />
         <aside className="space-y-6 text-sm">
           <div>
             <div className="eyebrow">Applying as</div>

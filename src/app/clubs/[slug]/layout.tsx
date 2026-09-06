@@ -8,7 +8,9 @@ import { labelFor } from "@/lib/status";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const club = await getClubHeader(slug);
-  return { title: club ? club.name : "Club" };
+  // Pages inside the club get "Board · UofT Robotics Association"; the overview keeps the root template.
+  const name = club ? club.name : "Club";
+  return { title: { default: name, template: `%s · ${name}` } };
 }
 
 export default async function ClubLayout({ params, children }: { params: Promise<{ slug: string }>; children: React.ReactNode }) {

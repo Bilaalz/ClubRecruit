@@ -18,11 +18,7 @@ import { formatDateRange } from "@/components/project/shared";
 type Params = Promise<{ slug: string }>;
 type Search = Promise<{ ws?: string; phase?: string }>;
 
-export async function generateMetadata({ params }: { params: Params }) {
-  const { slug } = await params;
-  const ctx = await getClubContext(slug);
-  return { title: ctx ? `${ctx.club.name} · Edit project plan` : "Edit project plan" };
-}
+export const metadata = { title: "Edit project plan" };
 
 export default async function EditProjectPage({ params, searchParams }: { params: Params; searchParams: Search }) {
   const [{ slug }, { ws: focusWs, phase: focusPhase }] = await Promise.all([params, searchParams]);
