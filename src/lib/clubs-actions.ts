@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireClubAdmin } from "@/lib/auth";
-import { SUBTEAM_COLORS } from "@/lib/clubs";
+import { SUBTEAM_COLORS } from "@/components/clubs/color-palette";
 
 export type ActionState = { error?: string; success?: string; fieldErrors?: Record<string, string> } | null;
 

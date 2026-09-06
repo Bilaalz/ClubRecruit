@@ -1,18 +1,6 @@
 import { db } from "@/lib/db";
 import type { CurrentUser } from "@/lib/auth";
 
-/** Muted palette for subteam colors. Stays legible on cream. */
-export const SUBTEAM_COLORS = [
-  "#3B5B7C", // slate blue
-  "#7C5A3B", // umber
-  "#5F7C3B", // moss
-  "#7C3B5F", // plum
-  "#3B7C74", // teal
-  "#7C6E3B", // ochre
-  "#5B3B7C", // violet
-  "#6B6B6B", // grey
-] as const;
-
 /** Club header + counts, used by the club layout. */
 export async function getClubHeader(slug: string) {
   return db.club.findUnique({

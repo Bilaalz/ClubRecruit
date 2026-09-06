@@ -31,3 +31,13 @@ title, subteam (optional), description (markdown-ish plain text), requirements (
 
 - The club layout renders a sub-nav; only show **Manage** to OWNER/ADMIN.
 - Applicant counts come from `application` relation counts; do not build review UI here (Stage 5).
+
+## Requests
+
+Nothing blocking. Notes for other stages and one optional shared tweak:
+
+- **Stage 1 (optional):** `getClubContext(slug)` could `include` `university: { select: { name: true } }` and `_count: { select: { memberships: true } }` on the club. The club layout currently runs a second `getClubHeader(slug)` query to get those; folding them in would save a round-trip per club page.
+- **Stage 3 / 6:** the muted subteam palette (`SUBTEAM_COLORS`, 8 hexes) lives in `src/components/clubs/color-palette.tsx`. It is dependency-free and safe to import into client components. It is *not* in `src/lib/clubs.ts` because that file imports Prisma and cannot be bundled for the browser.
+- **Stage 4:** `/postings/[id]` links to `/postings/[id]/apply` only when `status === "OPEN"` and the user has no application yet; the apply page should still re-check both. The dashboard and posting page link to `/applications`.
+- **Stage 5:** the manage dashboard links each recent applicant to `/clubs/[slug]/manage/applications/[id]` and the quick links include `/clubs/[slug]/manage/applications`.
+- **Everyone:** `src/lib/status.ts` exports `postingStatusTone`, `applicationStatusTone`, `taskStatusTone`, `workstreamStatusTone` (enum → `BadgeTone`) and `labelFor("UNDER_REVIEW") === "Under review"`. It only imports types, so it is safe anywhere.
