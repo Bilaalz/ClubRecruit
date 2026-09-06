@@ -1,0 +1,287 @@
+// ClubRecruit data model. See docs/stages/00-overview.md for a narrative summary.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────────────────── Enums ─────────────────────────
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  LEAD
+  MEMBER
+}
+
+enum PostingStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  SUBMITTED          // resume in, interview not done
+  INTERVIEW_COMPLETE // transcript stored, evaluation pending
+  UNDER_REVIEW       // AI evaluation done, waiting on admins
+  ACCEPTED
+  REJECTED
+}
+
+enum Recommendation {
+  STRONG_YES
+  YES
+  MAYBE
+  NO
+}
+
+enum WorkstreamStatus {
+  PLANNED
+  ACTIVE
+  BLOCKED
+  DONE
+}
+
+enum TaskStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// ───────────────────────── Identity ─────────────────────────
+
+model University {
+  id         String   @id @default(cuid())
+  name       String
+  domain     String   @unique // e.g. "utoronto.ca"; signup restricted to this + altDomains
+  altDomains String[] @default([])
+  users      User[]
+  clubs      Club[]
+  createdAt  DateTime @default(now())
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  program      String?  // e.g. "Computer Science"
+  year         Int?     // 1..5
+  bio          String?
+  passwordHash String?  // set in Stage 7
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+
+  memberships  Membership[]
+  applications Application[]
+  createdAt    DateTime @default(now())
+}
+
+// ───────────────────────── Clubs ─────────────────────────
+
+model Club {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  tagline      String?
+  description  String
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+
+  memberships  Membership[]
+  subteams     Subteam[]
+  postings     Posting[]
+  project      Project?
+  tasks        Task[]
+  createdAt    DateTime @default(now())
+}
+
+model Subteam {
+  id          String  @id @default(cuid())
+  clubId      String
+  club        Club    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  color       String  @default("#6B6B6B") // muted hex; used for chips and flow cards
+  order       Int     @default(0)
+
+  memberships Membership[]
+  postings    Posting[]
+  workstreams Workstream[]
+
+  @@unique([clubId, name])
+}
+
+model Membership {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubId    String
+  club      Club           @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  role      MembershipRole @default(MEMBER)
+  title     String?        // e.g. "Firmware Developer"
+  subteamId String?
+  subteam   Subteam?       @relation(fields: [subteamId], references: [id], onDelete: SetNull)
+  joinedAt  DateTime       @default(now())
+
+  assignedTasks Task[]
+
+  @@unique([userId, clubId])
+}
+
+// ───────────────────────── Recruiting ─────────────────────────
+
+model Posting {
+  id                 String        @id @default(cuid())
+  clubId             String
+  club               Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  subteamId          String?
+  subteam            Subteam?      @relation(fields: [subteamId], references: [id], onDelete: SetNull)
+  title              String
+  description        String
+  requirements       String[]      @default([])
+  responsibilities   String[]      @default([])
+  interviewQuestions String[]      @default([])
+  openings           Int           @default(1)
+  status             PostingStatus @default(DRAFT)
+  closesAt           DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  applications Application[]
+}
+
+model Application {
+  id           String            @id @default(cuid())
+  postingId    String
+  posting      Posting           @relation(fields: [postingId], references: [id], onDelete: Cascade)
+  applicantId  String
+  applicant    User              @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  status       ApplicationStatus @default(SUBMITTED)
+  coverNote    String?
+  decisionNote String?
+  decidedAt    DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  resume     Resume?
+  interview  Interview?
+  evaluation Evaluation?
+
+  @@unique([postingId, applicantId])
+}
+
+model Resume {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  fileName      String
+  fileUrl       String      // demo: not actually served
+  sizeBytes     Int         @default(0)
+  extractedText String
+  createdAt     DateTime    @default(now())
+}
+
+/// transcript is Json: Array<{ speaker: "Interviewer" | "Candidate"; text: string; atSec: number }>
+model Interview {
+  id            String      @id @default(cuid())
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  recordingUrl  String?     // demo: not actually served
+  durationSec   Int
+  transcript    Json
+  completedAt   DateTime    @default(now())
+}
+
+/// rubric is Json: Array<{ criterion: string; score: number /*1-5*/; note: string }>
+model Evaluation {
+  id             String         @id @default(cuid())
+  applicationId  String         @unique
+  application    Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  overallScore   Int            // 0-100
+  recommendation Recommendation
+  summary        String
+  strengths      String[]       @default([])
+  concerns       String[]       @default([])
+  rubric         Json
+  model          String         // e.g. "claude-..." or "mock-v1"
+  createdAt      DateTime       @default(now())
+}
+
+// ───────────────────────── Project plan ─────────────────────────
+
+model Project {
+  id         String    @id @default(cuid())
+  clubId     String    @unique
+  club       Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  name       String
+  summary    String
+  goals      String[]  @default([])
+  targetDate DateTime?
+  phases     Phase[]
+  workstreams Workstream[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Phase {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  order       Int      @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  workstreams Workstream[]
+}
+
+/// A chunk of work owned by a subteam. dependsOn is a list of Workstream ids (drawn as connectors).
+model Workstream {
+  id          String           @id @default(cuid())
+  projectId   String
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phaseId     String?
+  phase       Phase?           @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+  subteamId   String?
+  subteam     Subteam?         @relation(fields: [subteamId], references: [id], onDelete: SetNull)
+  name        String
+  description String?
+  status      WorkstreamStatus @default(PLANNED)
+  order       Int              @default(0)
+  dependsOn   String[]         @default([])
+  tasks       Task[]
+}
+
+// ───────────────────────── Tasks ─────────────────────────
+
+model Task {
+  id           String       @id @default(cuid())
+  clubId       String
+  club         Club         @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  workstreamId String?
+  workstream   Workstream?  @relation(fields: [workstreamId], references: [id], onDelete: SetNull)
+  assigneeId   String?
+  assignee     Membership?  @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  title        String
+  description  String?
+  status       TaskStatus   @default(TODO)
+  priority     TaskPriority @default(MEDIUM)
+  order        Int          @default(0)
+  dueDate      DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([clubId, status, order])
+}

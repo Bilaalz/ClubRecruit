@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/*
+  ClubRecruit design tokens — cream white & black.
+  Single-theme by design: dark mode is intentionally not supported.
+*/
+:root {
+  --cream: #f6f1e7;
+  --cream-2: #fbf8f1;
+  --cream-3: #ede6d8;
+  --ink: #111111;
+  --ink-2: #2b2b2b;
+  --ink-3: #5a5a5a;
+  --ink-4: #8a867e;
+  --line: #111111;
+  --line-soft: #d9d2c3;
+  --ok: #2f6b3a;
+  --warn: #8a5a12;
+  --bad: #8f2d2d;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-cream-2: var(--cream-2);
+  --color-cream-3: var(--cream-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
+
+html {
+  background: var(--cream);
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* Hairline utilities */
+.hairline { border: 1px solid var(--line); }
+.hairline-soft { border: 1px solid var(--line-soft); }
+
+/* Small caps label */
+.eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}

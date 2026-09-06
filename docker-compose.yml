@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: clubrecruit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: clubrecruit
+      POSTGRES_PASSWORD: clubrecruit
+      POSTGRES_DB: clubrecruit
+    ports:
+      - "5433:5432"
+    volumes:
+      - clubrecruit-pgdata:/var/lib/postgresql/data
+
+volumes:
+  clubrecruit-pgdata:
