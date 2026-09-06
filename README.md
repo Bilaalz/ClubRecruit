@@ -1,5 +1,7 @@
 # ClubRecruit
 
+[![CI](https://github.com/Bilaalz/ClubRecruit/actions/workflows/ci.yml/badge.svg)](https://github.com/Bilaalz/ClubRecruit/actions/workflows/ci.yml)
+
 ClubRecruit is a recruiting and team-operations platform for university clubs. A club posts roles per subteam, students apply with a resume and a short recorded interview, Claude scores the interview against a rubric, and club admins review, accept and assign applicants — who then land on a kanban board wired to the club's project plan.
 
 The workflow is modelled on how the University of Toronto World Cup club — which I am a member of — actually recruits and runs a season: hiring into subteams rather than one general intake, a resume-plus-interview funnel with a consistent rubric, and accepted members landing directly on the work their subteam owns.
@@ -59,14 +61,17 @@ The suite covers the logic the rest of the app leans on, and needs no database o
 | --- | --- |
 | `src/lib/auth.ts` | Signup domain policy (case-insensitivity, alternate domains, look-alike domains such as `utoronto.ca.evil.com`) and `safeNext`, which rejects open-redirect targets like `//evil.com` |
 | `src/lib/password.ts` | bcrypt round-trip, per-hash salting, wrong-password and malformed-hash rejection |
-| `src/lib/ai/*` | The deterministic scorer: same input scores the same, rubric is one row per criterion in canonical order, a matching candidate outranks a non-matching one, recommendation always agrees with the score band, and the output validates against the Zod contract that Claude's structured output shares |
+| `src/lib/ai/mock.ts` | The deterministic scorer: same input scores the same, rubric is one row per criterion in canonical order, a matching candidate outranks a non-matching one, and the score does not move when only the applicant's name, program or year changes |
+| `src/lib/ai/evaluate.ts` | Evaluator selection and degradation, against a stubbed Anthropic client: no key uses the offline scorer without calling out, and an API error, a refusal or a schema-breaking payload each fall back to it — with the fallback recorded in the model name. Also that Claude's rubric is normalised into canonical order |
 | `src/lib/transcript.ts` | Guards for the `Json` transcript and rubric columns — malformed rows are dropped, scores clamped |
 | `src/lib/project.ts` | `topoLayout`: dependencies before dependents, deterministic tie-breaking, dependency cycles lose no workstreams |
 | `src/lib/tasks.ts`, `src/components/board/shared.ts` | Board DTO mapping (dates serialised, server-only fields dropped) and the due-date / overdue helpers |
 | `src/lib/status.ts` | Every Prisma enum value has a badge tone, so a schema change cannot silently leave one unmapped |
 | `src/lib/review.ts`, `src/lib/applications.ts` | Relative-time, date, byte and duration formatters, and the application timeline step map |
 
-Not covered: the Prisma queries and server actions, which are thin wrappers over the database and would need a test database, and the React components. That is the main gap if this were to go further.
+Not covered: the Prisma queries and server actions, which would need a test database to say anything meaningful, and the React components. That is the main gap if this were to go further.
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs `typecheck`, `lint`, the test suite and a production build on every push and pull request. No database is required — every route is server-rendered on demand, so nothing queries Postgres during `next build`.
 
 ## Route map
 
@@ -93,6 +98,8 @@ Not covered: the Prisma queries and server actions, which are thin wrappers over
 
 The app was built in eight stages against a written spec per stage: foundation (schema, seed, app shell, UI primitives), then five feature areas each owning a distinct set of files — clubs and postings, the project plan and dependency flow, applications with interview and AI evaluation, the review / accept / assign pipeline, and the task board — then real authentication, then a UI-consistency pass.
 
+[`ARCHITECTURE.md`](ARCHITECTURE.md) covers the design decisions and what each one cost: why roles live on the membership join table, why `Workstream.dependsOn` is an array column instead of a join table, why sessions are database rows rather than JWTs, why the middleware is an optimisation and not the security boundary, and how the AI evaluator degrades.
+
 Conventions that hold throughout:
 
 - Queries live in `src/lib/<domain>.ts`, mutations in `src/lib/<domain>-actions.ts` (`"use server"`). Pages stay thin.
@@ -107,5 +114,6 @@ Known and deliberate, given the demo scope:
 
 - **Uploads and recordings are simulated.** `Resume` and `Interview` rows hold metadata, extracted text and a transcript; no file is stored and no audio is processed.
 - **Not production-hardened auth.** Sessions are a `Session` table plus an HTTP-only, `sameSite: lax` cookie, and passwords are bcrypt-hashed — but there is no rate limiting, email verification, password reset or CSRF token.
-- **No integration or end-to-end tests, and no CI.** See [Tests](#tests) for what is and is not covered.
+- **No integration or end-to-end tests.** Unit tests and a build run in CI; the Prisma queries and server actions are not exercised against a real database. See [Tests](#tests).
+- **Performance shortcuts.** `listPipeline` loads every application for a club and sorts in memory, and the board loads every task for a club at once. Both want pagination and an index before real volume. The kanban board is also pointer-only, with no keyboard path.
 - **Single-tenant seed data.** One university and one club are seeded; nothing enforces cross-university isolation beyond the university-scoped queries.
