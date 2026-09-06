@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -488,7 +487,7 @@ async function main() {
   const wTeleop = await ws("Teleop & telemetry dashboard", phBuild.id, software.id, "PLANNED", 2, "Operator station: video, telemetry, arm control, 900 MHz link.", [wAutonomy.id, wPdb.id]);
 
   const wField = await ws("Field testing campaign", phTest.id, software.id, "PLANNED", 0, "Six weekend test days at the gravel pit; regression checklist per system.", [wDrive.id, wHarness.id, wTeleop.id]);
-  const wCompete = await ws("URC 2027 competition", phTest.id, outreach.id, "PLANNED", 1, "Travel logistics, shipping crate, competition run, media.", [wField.id, wSponsor.id]);
+  await ws("URC 2027 competition", phTest.id, outreach.id, "PLANNED", 1, "Travel logistics, shipping crate, competition run, media.", [wField.id, wSponsor.id]);
 
   // ── Tasks ──────────────────────────────────────────────────
   type TS = "BACKLOG" | "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";

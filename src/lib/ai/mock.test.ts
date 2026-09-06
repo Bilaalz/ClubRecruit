@@ -116,3 +116,52 @@ describe("mockEvaluate", () => {
     expect(MOCK_MODEL).toBe("mock-v1");
   });
 });
+
+/**
+ * Properties the scorer must hold whatever else changes about it. The first two
+ * matter most: this thing ranks people, so a score has to come from the evidence
+ * in the application and nothing else about who the applicant is.
+ */
+describe("mockEvaluate — scoring invariants", () => {
+  const scoreOf = ({ overallScore, recommendation, rubric }: ReturnType<typeof mockEvaluate>) => ({
+    overallScore,
+    recommendation,
+    rubric,
+  });
+
+  it("does not let the applicant's name move the score", () => {
+    const names = ["Aisha Rahman", "John Smith", "Wei Zhang", "Oluwaseun Adeyemi", "X"];
+    const scores = names.map((name) => scoreOf(mockEvaluate({ ...strong, applicant: { ...strong.applicant, name } })));
+    for (const score of scores) {
+      expect(score).toEqual(scores[0]);
+    }
+  });
+
+  it("does not let the applicant's program or year move the score", () => {
+    const first = mockEvaluate(strong);
+    const second = mockEvaluate({ ...strong, applicant: { ...strong.applicant, program: "Philosophy", year: 5 } });
+    expect(second).toEqual(first);
+  });
+
+  it("reads the resume case-insensitively", () => {
+    const shouting = mockEvaluate({ ...strong, resumeText: strong.resumeText.toUpperCase() });
+    expect(scoreOf(shouting)).toEqual(scoreOf(mockEvaluate(strong)));
+  });
+
+  it("does not reward the order resume bullets happen to be in", () => {
+    const reordered = strong.resumeText.split("\n").reverse().join("\n");
+    expect(scoreOf(mockEvaluate({ ...strong, resumeText: reordered }))).toEqual(scoreOf(mockEvaluate(strong)));
+  });
+
+  it("ignores interview timestamps", () => {
+    const shifted = strong.transcript.map((turn) => ({ ...turn, atSec: turn.atSec + 600 }));
+    expect(mockEvaluate({ ...strong, transcript: shifted })).toEqual(mockEvaluate(strong));
+  });
+
+  it("does not reward repeating the same keyword", () => {
+    const stuffed = `${strong.resumeText}\n${"ROS 2 Python C++ ".repeat(50)}`;
+    const before = mockEvaluate(strong).overallScore;
+    const after = mockEvaluate({ ...strong, resumeText: stuffed }).overallScore;
+    expect(after).toBeLessThanOrEqual(before);
+  });
+});
