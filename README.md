@@ -1,6 +1,10 @@
 # ClubRecruit
 
-ClubRecruit is a recruiting and team-operations platform for university clubs. A club posts roles per subteam, students apply with a resume and a short recorded interview, Claude scores the interview against a rubric, and club admins review, accept and assign applicants — who then land on a kanban board wired to the club's project plan. It is a demo: real database, real data flow, typed end to end, with uploads and recordings simulated.
+ClubRecruit is a recruiting and team-operations platform for university clubs. A club posts roles per subteam, students apply with a resume and a short recorded interview, Claude scores the interview against a rubric, and club admins review, accept and assign applicants — who then land on a kanban board wired to the club's project plan.
+
+The workflow is modelled on how the University of Toronto World Cup club — which I am a member of — actually recruits and runs a season: hiring into subteams rather than one general intake, a resume-plus-interview funnel with a consistent rubric, and accepted members landing directly on the work their subteam owns.
+
+**The repository itself is purely a demo.** It is not deployed and has never run that club's recruiting. The database, schema and data flow are real and the whole app is typed end to end, but the seeded university, club, members and applicants are fictional, and the resume upload and interview recording steps are simulated (stored metadata plus sample content, no file storage or media pipeline). See [Limitations](#limitations).
 
 ## Stack
 
@@ -42,6 +46,28 @@ Other scripts: `npm run db:reset` (drop, push and re-seed), `npm run db:studio`,
 
 Set `ANTHROPIC_API_KEY` in `.env` and interviews are evaluated by Claude with a structured-output rubric (`src/lib/ai/evaluate.ts`). Without a key the deterministic mock in `src/lib/ai/mock.ts` produces plausible scores so the demo works offline. If a Claude call fails, the app falls back to the mock and records the model name accordingly.
 
+## Tests
+
+```bash
+npm test          # vitest, single run
+npm run test:watch
+```
+
+The suite covers the logic the rest of the app leans on, and needs no database or API key:
+
+| Area | What is asserted |
+| --- | --- |
+| `src/lib/auth.ts` | Signup domain policy (case-insensitivity, alternate domains, look-alike domains such as `utoronto.ca.evil.com`) and `safeNext`, which rejects open-redirect targets like `//evil.com` |
+| `src/lib/password.ts` | bcrypt round-trip, per-hash salting, wrong-password and malformed-hash rejection |
+| `src/lib/ai/*` | The deterministic scorer: same input scores the same, rubric is one row per criterion in canonical order, a matching candidate outranks a non-matching one, recommendation always agrees with the score band, and the output validates against the Zod contract that Claude's structured output shares |
+| `src/lib/transcript.ts` | Guards for the `Json` transcript and rubric columns — malformed rows are dropped, scores clamped |
+| `src/lib/project.ts` | `topoLayout`: dependencies before dependents, deterministic tie-breaking, dependency cycles lose no workstreams |
+| `src/lib/tasks.ts`, `src/components/board/shared.ts` | Board DTO mapping (dates serialised, server-only fields dropped) and the due-date / overdue helpers |
+| `src/lib/status.ts` | Every Prisma enum value has a badge tone, so a schema change cannot silently leave one unmapped |
+| `src/lib/review.ts`, `src/lib/applications.ts` | Relative-time, date, byte and duration formatters, and the application timeline step map |
+
+Not covered: the Prisma queries and server actions, which are thin wrappers over the database and would need a test database, and the React components. That is the main gap if this were to go further.
+
 ## Route map
 
 | Route | Who | Purpose |
@@ -65,4 +91,21 @@ Set `ANTHROPIC_API_KEY` in `.env` and interviews are evaluated by Claude with a 
 
 ## How it was built
 
-The app was built in eight stages, each with its own spec in [`docs/stages/`](docs/stages/): foundation (schema, seed, shell, UI primitives), then five independent feature stages built in parallel against distinct file sets (clubs and postings, project plan and flow, applications and AI evaluation, review flow, task board), then real authentication and a final UI-polish pass. [`docs/stages/00-overview.md`](docs/stages/00-overview.md) has the data model and conventions; [`docs/BUILDING.md`](docs/BUILDING.md) has the ground rules each stage followed. Each stage doc ends with a `## Requests` section — the notes one stage left for another.
+The app was built in eight stages against a written spec per stage: foundation (schema, seed, app shell, UI primitives), then five feature areas each owning a distinct set of files — clubs and postings, the project plan and dependency flow, applications with interview and AI evaluation, the review / accept / assign pipeline, and the task board — then real authentication, then a UI-consistency pass.
+
+Conventions that hold throughout:
+
+- Queries live in `src/lib/<domain>.ts`, mutations in `src/lib/<domain>-actions.ts` (`"use server"`). Pages stay thin.
+- Every server action re-validates its input with `zod` and re-checks authorization with `requireUser()` / `requireClubAdmin(clubId)` — the UI hiding a button is never the only check.
+- Server Components by default; `"use client"` only where there is real interactivity (drag-and-drop board, flow canvas, forms with local state).
+- Data crossing to a client component is a flat, serialisable DTO with dates as ISO strings (see `toBoardTask`).
+- `prisma/schema.prisma` is the source of truth for the data model.
+
+## Limitations
+
+Known and deliberate, given the demo scope:
+
+- **Uploads and recordings are simulated.** `Resume` and `Interview` rows hold metadata, extracted text and a transcript; no file is stored and no audio is processed.
+- **Not production-hardened auth.** Sessions are a `Session` table plus an HTTP-only, `sameSite: lax` cookie, and passwords are bcrypt-hashed — but there is no rate limiting, email verification, password reset or CSRF token.
+- **No integration or end-to-end tests, and no CI.** See [Tests](#tests) for what is and is not covered.
+- **Single-tenant seed data.** One university and one club are seeded; nothing enforces cross-university isolation beyond the university-scoped queries.
