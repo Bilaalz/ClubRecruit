@@ -44,3 +44,6 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated/
+
+# build notes — kept locally, not published
+/docs/
