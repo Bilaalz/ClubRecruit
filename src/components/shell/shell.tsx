@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { Avatar } from "@/components/ui/avatar";
 import { NavLink } from "./nav-link";
+import { UserMenu } from "./user-menu";
 
 export async function Shell({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -26,18 +26,7 @@ export async function Shell({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            {user ? (
-              <Link href="/switch-user" className="flex items-center gap-2 rounded-sm px-2 py-1 text-sm hover:bg-cream-3" title="Switch persona">
-                <Avatar name={user.name} size="sm" />
-                <span className="hidden sm:inline">{user.name}</span>
-                <span className="hidden text-ink-4 sm:inline">·</span>
-                <span className="hidden text-xs text-ink-4 sm:inline">switch</span>
-              </Link>
-            ) : (
-              <Link href="/switch-user" className="text-sm underline">
-                Choose persona
-              </Link>
-            )}
+            <UserMenu user={user ? { name: user.name, email: user.email } : null} />
           </div>
         </div>
       </header>
