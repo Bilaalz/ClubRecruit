@@ -32,3 +32,10 @@
 
 - One application per (posting, applicant) — surface a friendly message if already applied.
 - Status transitions: SUBMITTED → INTERVIEW_COMPLETE → UNDER_REVIEW → (Stage 5) ACCEPTED / REJECTED.
+
+## Requests
+
+- **Stage 2:** the Apply button on `/postings/[id]` should link to `/postings/[id]/apply` (the flow handles "already applied" and non-OPEN postings itself, so no extra checks are needed there).
+- **Stage 8:** consolidate `applicationStatusTone` / `applicationStatusLabel` from `src/lib/applications.ts` into `src/lib/status.ts`.
+- **Stage 1 (docs only):** sample content lives in `prisma/seed/sample-content.ts` (not `sample-resume.ts` / `sample-answers.ts` as this doc said). The app does not import from `prisma/`; a copy is kept in `src/lib/ai/samples.ts` — keep the two in sync if either changes.
+- No changes to `prisma/schema.prisma`, `src/lib/auth.ts` or `src/components/ui/*` were needed.

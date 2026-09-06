@@ -17,13 +17,28 @@ const WE_WORDS = /\b(we|our|us|team|teammate|teammates)\b/gi;
 const I_WORDS = /\b(i|my|me)\b/gi;
 const NUMBERS = /\b\d[\d,.%]*\b/g;
 
-function tokenise(text: string): string[] {
+/** Very light stemmer so "tests" matches "test" and "designed" matches "design". */
+function stem(t: string): string {
+  if (t.length <= 4) return t;
+  if (t.endsWith("ies")) return t.slice(0, -3) + "y";
+  if (t.endsWith("ing") && t.length > 6) return t.slice(0, -3);
+  if (t.endsWith("ed") && t.length > 5) return t.slice(0, -2);
+  if (t.endsWith("es") && t.length > 5) return t.slice(0, -2);
+  if (t.endsWith("s") && !t.endsWith("ss")) return t.slice(0, -1);
+  return t;
+}
+
+function tokeniseRaw(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9+#./ -]/g, " ")
-    .split(/[\s/]+/)
+    .split(/[\s/-]+/)
     .map((t) => t.replace(/^[.-]+|[.-]+$/g, ""))
     .filter((t) => t.length >= 2 && !STOPWORDS.has(t) && !/^\d+$/.test(t));
+}
+
+function tokenise(text: string): string[] {
+  return tokeniseRaw(text).map(stem);
 }
 
 function uniq<T>(xs: T[]): T[] {
@@ -59,6 +74,12 @@ export function mockEvaluate(input: EvaluationInput): EvaluationResult {
   const reqKeywords = uniq(tokenise(posting.requirements.join(" ")));
   const descKeywords = uniq(tokenise(`${posting.description} ${posting.responsibilities.join(" ")} ${posting.title}`));
   const allKeywords = uniq([...reqKeywords, ...descKeywords]);
+  // Stem → the posting's original spelling, so text reads "SolidWorks" not "solidwork".
+  const display = new Map<string, string>();
+  for (const raw of tokeniseRaw(`${posting.requirements.join(" ")} ${posting.description} ${posting.responsibilities.join(" ")} ${posting.title}`)) {
+    if (!display.has(stem(raw))) display.set(stem(raw), raw);
+  }
+  const show = (k: string) => titleCase(display.get(k) ?? k);
 
   const resumeTokens = new Set(tokenise(resumeText));
   const transcriptTokens = new Set(tokenise(transcriptText));
@@ -68,8 +89,6 @@ export function mockEvaluate(input: EvaluationInput): EvaluationResult {
   const reqResumeHits = reqKeywords.filter((k) => resumeTokens.has(k));
   const missingReq = reqKeywords.filter((k) => !resumeTokens.has(k) && !transcriptTokens.has(k));
 
-  const resumeCoverage = allKeywords.length ? resumeHits.length / allKeywords.length : 0;
-  const transcriptCoverage = allKeywords.length ? transcriptHits.length / allKeywords.length : 0;
   const reqCoverage = reqKeywords.length ? reqResumeHits.length / reqKeywords.length : 0;
 
   // ── Answer quality signals ─────────────────────────────────
@@ -80,45 +99,46 @@ export function mockEvaluate(input: EvaluationInput): EvaluationResult {
   const weWords = count(WE_WORDS, transcriptText);
   const iWords = count(I_WORDS, transcriptText);
   const hedges = count(/\b(um|uh|probably|maybe|i guess|i think|kind of|sort of)\b/gi, transcriptText);
-  const resumeLines = resumeText.split("\n").filter((l) => l.trim()).length;
   const resumeBullets = count(/^\s*[-•]/gm, resumeText);
   const resumeNumbers = count(NUMBERS, resumeText);
 
   // ── Rubric (1–5 each) ──────────────────────────────────────
   // Relevant experience: requirement coverage in the resume + resume substance.
-  const experience = clamp(Math.round(1 + reqCoverage * 3 + Math.min(1, resumeBullets / 6)), 1, 5);
+  const experience = clamp(Math.round(1 + reqCoverage * 2.5 + Math.min(1.5, resumeBullets / 3)), 1, 5);
   // Technical depth: overall keyword coverage across both sources + quantified resume claims.
-  const depth = clamp(Math.round(1 + (resumeCoverage + transcriptCoverage) * 2.2 + Math.min(1, resumeNumbers / 8)), 1, 5);
+  const depth = clamp(Math.round(1 + Math.min(2, resumeHits.length / 5) + Math.min(1, transcriptHits.length / 3) + Math.min(1, resumeNumbers / 6)), 1, 5);
   // Communication: answer length, specificity (numbers, past-tense verbs), few hedges.
-  const commRaw = 1 + Math.min(1.5, avgWords / 40) + Math.min(1, numbers / 3) + Math.min(1, pastTense / 8) - Math.min(1, hedges / 3);
+  const commRaw = 1 + Math.min(1.5, avgWords / 35) + Math.min(1, numbers / 2) + Math.min(1, pastTense / 6) - Math.min(1, hedges / 4);
   const communication = clamp(Math.round(commRaw), 1, 5);
   // Motivation & fit: mentions of the club/role/posting vocabulary in the transcript + cover note.
   const fitMentions = transcriptHits.length + (input.coverNote ? Math.min(2, tokenise(input.coverNote).filter((t) => allKeywords.includes(t)).length) : 0);
   const extrinsic = count(/\b(resume|cv|look good|networking|meet people)\b/gi, transcriptText);
-  const motivation = clamp(Math.round(1 + Math.min(3, fitMentions / 2) + (avgWords > 35 ? 1 : 0) - Math.min(1, extrinsic)), 1, 5);
+  const intrinsic = count(/\b(want|excites?|excited|interested|love|enjoy|learn|join|curious|proud|real)\b/gi, transcriptText);
+  const motivation = clamp(Math.round(2 + Math.min(2, fitMentions / 2) + Math.min(1, intrinsic / 2) - Math.min(1.5, extrinsic)), 1, 5);
   // Collaboration: first-person plural vs singular, teamwork vocabulary.
   const teamWords = count(/\b(team|teammate|teammates|lead|together|pair|review|mentor|trained|coordinated|group)\b/gi, `${transcriptText}\n${resumeText}`);
   const alone = count(/\b(alone|by myself|on my own)\b/gi, transcriptText);
-  const collabRaw = 1 + Math.min(2, weWords / 3) + Math.min(1.5, teamWords / 4) + (iWords > 0 && weWords / Math.max(1, iWords) > 0.25 ? 0.5 : 0) - alone;
+  const collabRaw = 1 + Math.min(1.5, weWords / 2) + Math.min(1.5, teamWords / 4) + (iWords > 0 && weWords / Math.max(1, iWords) > 0.25 ? 0.5 : 0) - alone;
   const collaboration = clamp(Math.round(collabRaw), 1, 5);
 
   const rubricScores = [experience, depth, communication, motivation, collaboration];
   const rubric = RUBRIC_CRITERIA.map((criterion, i) => ({
     criterion,
     score: rubricScores[i],
-    note: rubricNote(criterion, rubricScores[i], { reqResumeHits, transcriptHits, numbers, pastTense, avgWords, weWords, hedges, missingReq }),
+    note: rubricNote(criterion, rubricScores[i], { reqResumeHits: reqResumeHits.map(show), transcriptHits: transcriptHits.map(show), numbers, pastTense, avgWords, weWords, hedges }),
   }));
 
   // Weighted overall (experience and depth count a little more).
   const weights = [0.25, 0.25, 0.2, 0.15, 0.15];
   const weighted = rubricScores.reduce((acc, s, i) => acc + ((s - 1) / 4) * weights[i], 0); // 0..1
-  const overallScore = clamp(Math.round(weighted * 88 + reqCoverage * 8 + Math.min(4, numbers)), 0, 100);
+  // 10 + 0..85 from the rubric, plus small bonuses for requirement coverage and concrete figures.
+  const overallScore = clamp(Math.round(12 + weighted * 85 + reqCoverage * 5 + Math.min(3, numbers)), 0, 100);
   const recommendation = recommendationForScore(overallScore);
 
   // ── Text ───────────────────────────────────────────────────
   const first = input.applicant.name.split(/\s+/)[0] || "The candidate";
-  const matched = uniq([...reqResumeHits, ...resumeHits]).slice(0, 4).map(titleCase);
-  const spoken = transcriptHits.slice(0, 3).map(titleCase);
+  const matched = uniq([...reqResumeHits, ...resumeHits]).slice(0, 4).map(show);
+  const spoken = transcriptHits.slice(0, 3).map(show);
 
   const strengths: string[] = [];
   if (matched.length) strengths.push(`Resume covers ${list(matched)} from the posting${posting.subteamName ? ` for ${posting.subteamName}` : ""}.`);
@@ -129,7 +149,7 @@ export function mockEvaluate(input: EvaluationInput): EvaluationResult {
   if (strengths.length === 0) strengths.push("Enthusiastic and honest about current gaps.");
 
   const concerns: string[] = [];
-  if (missingReq.length) concerns.push(`No evidence of ${list(missingReq.slice(0, 3).map(titleCase))} in the resume or interview.`);
+  if (missingReq.length) concerns.push(`No evidence of ${list(missingReq.slice(0, 3).map(show))} in the resume or interview.`);
   if (avgWords < 30) concerns.push(`Interview answers are short (about ${Math.round(avgWords)} words each) and stay high-level.`);
   if (hedges >= 3) concerns.push("Several hedged answers; hard to tell what they have actually done.");
   if (alone > 0) concerns.push("Describes preferring to work alone; collaboration is a core part of the role.");
@@ -165,16 +185,16 @@ export function mockEvaluate(input: EvaluationInput): EvaluationResult {
 function rubricNote(
   criterion: string,
   score: number,
-  s: { reqResumeHits: string[]; transcriptHits: string[]; numbers: number; pastTense: number; avgWords: number; weWords: number; hedges: number; missingReq: string[] },
+  s: { reqResumeHits: string[]; transcriptHits: string[]; numbers: number; pastTense: number; avgWords: number; weWords: number; hedges: number },
 ): string {
   switch (criterion) {
     case "Relevant experience":
       return s.reqResumeHits.length
-        ? `Resume matches ${list(s.reqResumeHits.slice(0, 3).map(titleCase))}.`
+        ? `Resume matches ${list(s.reqResumeHits.slice(0, 3))}.`
         : "Resume does not mention the listed requirements.";
     case "Technical / skill depth":
       return s.transcriptHits.length
-        ? `Interview references ${list(s.transcriptHits.slice(0, 3).map(titleCase))}.`
+        ? `Interview references ${list(s.transcriptHits.slice(0, 3))}.`
         : "Interview stays general; depth not demonstrated.";
     case "Communication":
       return `~${Math.round(s.avgWords)} words per answer, ${s.numbers} figures, ${s.hedges} hedges.`;
