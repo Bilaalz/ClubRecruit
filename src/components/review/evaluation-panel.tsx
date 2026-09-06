@@ -1,6 +1,8 @@
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle, EmptyState } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { formatDate, labelFor, parseRubric, recommendationTone, type ReviewApplication } from "@/lib/review";
+import { formatDate, type ReviewApplication } from "@/lib/review";
+import { labelFor, recommendationTone } from "@/lib/status";
+import { parseRubric } from "@/lib/transcript";
 import { rerunEvaluation } from "@/lib/review-actions";
 import { ScoreRing } from "./score-ring";
 

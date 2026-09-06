@@ -1,5 +1,6 @@
 import { Badge, Button } from "@/components/ui";
-import { formatDate, formatRelative, labelFor, statusTone, type ReviewApplication } from "@/lib/review";
+import { formatDate, formatRelative, type ReviewApplication } from "@/lib/review";
+import { applicationStatusTone, labelFor } from "@/lib/status";
 import { reopenApplication } from "@/lib/review-actions";
 import { AcceptDialog } from "./accept-dialog";
 import { RejectDialog } from "./reject-dialog";
@@ -26,7 +27,7 @@ export function DecisionBar({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge tone={statusTone[application.status]}>{labelFor(application.status)}</Badge>
+              <Badge tone={applicationStatusTone[application.status]}>{labelFor(application.status)}</Badge>
               {application.decidedAt && (
                 <span className="text-sm text-ink-3">
                   {verb} {formatDate(application.decidedAt)} · {formatRelative(application.decidedAt)}

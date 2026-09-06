@@ -1,39 +1,10 @@
 import { db } from "@/lib/db";
-import type { BadgeTone } from "@/components/ui/badge";
 import type { ApplicationStatus } from "@/generated/prisma/enums";
-import { parseTranscript } from "@/lib/ai/evaluate";
-import type { TranscriptTurn } from "@/lib/ai/samples";
+import { parseTranscript, type TranscriptTurn } from "@/lib/transcript";
 
 export type { TranscriptTurn };
 
-// ── Status presentation (local; Stage 8 consolidates into src/lib/status.ts) ──
-
-export const APPLICATION_STATUS_LABEL: Record<ApplicationStatus, string> = {
-  SUBMITTED: "Submitted",
-  INTERVIEW_COMPLETE: "Interview complete",
-  UNDER_REVIEW: "Under review",
-  ACCEPTED: "Accepted",
-  REJECTED: "Rejected",
-};
-
-export function applicationStatusTone(status: ApplicationStatus): BadgeTone {
-  switch (status) {
-    case "SUBMITTED":
-      return "neutral";
-    case "INTERVIEW_COMPLETE":
-      return "outline";
-    case "UNDER_REVIEW":
-      return "warn";
-    case "ACCEPTED":
-      return "ok";
-    case "REJECTED":
-      return "bad";
-  }
-}
-
-export function applicationStatusLabel(status: ApplicationStatus) {
-  return APPLICATION_STATUS_LABEL[status];
-}
+// Status badge tones and labels live in src/lib/status.ts.
 
 /** Timeline steps shown to the applicant. */
 export const APPLICATION_STEPS = [

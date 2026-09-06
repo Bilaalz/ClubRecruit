@@ -7,14 +7,15 @@ import {
   formatRelative,
   getApplicantMembership,
   getReviewApplication,
-  labelFor,
   listSubteamOptions,
-  statusTone,
 } from "@/lib/review";
+import { applicationStatusTone, labelFor } from "@/lib/status";
 import { DecisionBar } from "@/components/review/decision-bar";
 import { ResumePanel } from "@/components/review/resume-panel";
 import { InterviewPanel } from "@/components/review/interview-panel";
 import { EvaluationPanel } from "@/components/review/evaluation-panel";
+
+export const metadata = { title: "Review application" };
 
 export default async function ReviewApplicationPage({ params }: { params: Promise<{ slug: string; id: string }> }) {
   const { slug, id } = await params;
@@ -72,7 +73,7 @@ export default async function ReviewApplicationPage({ params }: { params: Promis
           </dd>
           <dt className="eyebrow self-center">Status</dt>
           <dd>
-            <Badge tone={statusTone[application.status]}>{labelFor(application.status)}</Badge>
+            <Badge tone={applicationStatusTone[application.status]}>{labelFor(application.status)}</Badge>
           </dd>
           <dt className="eyebrow self-center">Applied</dt>
           <dd>

@@ -1,9 +1,16 @@
 import type { BadgeTone } from "@/components/ui/badge";
-import type { ApplicationStatus, PostingStatus, TaskStatus, WorkstreamStatus } from "@/generated/prisma/enums";
+import type {
+  ApplicationStatus,
+  PostingStatus,
+  Recommendation,
+  TaskStatus,
+  WorkstreamStatus,
+} from "@/generated/prisma/enums";
 
 /**
  * Shared status → badge tone maps and a label helper.
- * Keep this file small and dependency-free; every stage imports it.
+ * Keep this file small and dependency-free (types only); every stage imports it,
+ * including "use client" components.
  */
 
 export const postingStatusTone: Record<PostingStatus, BadgeTone> = {
@@ -20,6 +27,13 @@ export const applicationStatusTone: Record<ApplicationStatus, BadgeTone> = {
   REJECTED: "bad",
 };
 
+export const recommendationTone: Record<Recommendation, BadgeTone> = {
+  STRONG_YES: "ok",
+  YES: "ok",
+  MAYBE: "warn",
+  NO: "bad",
+};
+
 export const taskStatusTone: Record<TaskStatus, BadgeTone> = {
   BACKLOG: "outline",
   TODO: "neutral",
@@ -29,9 +43,9 @@ export const taskStatusTone: Record<TaskStatus, BadgeTone> = {
 };
 
 export const workstreamStatusTone: Record<WorkstreamStatus, BadgeTone> = {
-  PLANNED: "neutral",
+  PLANNED: "outline",
   ACTIVE: "ink",
-  BLOCKED: "bad",
+  BLOCKED: "warn",
   DONE: "ok",
 };
 

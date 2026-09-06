@@ -10,11 +10,7 @@ import { CreateProjectForm } from "@/components/project/forms";
 
 type Params = Promise<{ slug: string }>;
 
-export async function generateMetadata({ params }: { params: Params }) {
-  const { slug } = await params;
-  const ctx = await getClubContext(slug);
-  return { title: ctx ? `${ctx.club.name} · Project plan` : "Project plan" };
-}
+export const metadata = { title: "Project plan" };
 
 export default async function ProjectPage({ params }: { params: Params }) {
   const { slug } = await params;
@@ -66,9 +62,11 @@ export default async function ProjectPage({ params }: { params: Params }) {
             <h2 className="mt-1 font-serif text-2xl leading-tight">Phases, workstreams and dependencies</h2>
           </div>
           {ctx.isAdmin && (
-            <ButtonLink href={`/clubs/${slug}/project/edit`} variant="ghost" size="sm" className="hidden sm:inline-flex">
-              Edit phases &amp; workstreams
-            </ButtonLink>
+            <div className="hidden sm:block">
+              <ButtonLink href={`/clubs/${slug}/project/edit`} variant="ghost" size="sm">
+                Edit phases &amp; workstreams
+              </ButtonLink>
+            </div>
           )}
         </div>
         <FlowCanvas plan={plan} slug={slug} isAdmin={ctx.isAdmin} />

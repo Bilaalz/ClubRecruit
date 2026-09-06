@@ -1,16 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireClubAdmin } from "@/lib/auth";
 import { WorkstreamStatus } from "@/generated/prisma/enums";
+import type { FormState } from "@/components/ui/action-form";
 
 /**
  * Stage 3 — project plan mutations. Every action re-checks that the current
- * persona is an OWNER/ADMIN of the club that owns the record being edited.
+ * user is an OWNER/ADMIN of the club that owns the record being edited.
+ *
+ * Form actions take `(prevState, formData)` and return `{ error }` / `{ success }`
+ * so `<ActionForm>` can render the message inline instead of the dev overlay.
  */
+
+export type { FormState };
+
+/** Run a mutation, turning expected failures into `{ error }`. Redirects pass through. */
+async function attempt(success: string, fn: () => Promise<void>): Promise<FormState> {
+  try {
+    await fn();
+    return { success };
+  } catch (err) {
+    unstable_rethrow(err);
+    console.warn("[project-actions]", err);
+    return { error: err instanceof Error ? err.message : "Something went wrong. Please try again." };
+  }
+}
 
 // ───────────────────────── helpers ─────────────────────────
 
@@ -45,7 +63,11 @@ function fields(formData: FormData) {
 
 function fail(result: { success: false; error: z.ZodError }): never {
   const issue = result.error.issues[0];
-  throw new Error(issue ? `${issue.path.join(".") || "form"}: ${issue.message}` : "Invalid input");
+  if (!issue) throw new Error("Please check the form and try again.");
+  const field = issue.path.map(String).join(".");
+  // Zod's custom messages already read as sentences; only prefix the generic ones.
+  const generic = /^(Invalid|Too|Expected|Required|Number)/.test(issue.message);
+  throw new Error(generic && field ? `${field[0].toUpperCase()}${field.slice(1)}: ${issue.message}` : issue.message);
 }
 
 function revalidateProject(slug: string) {
@@ -146,25 +168,32 @@ const projectSchema = z.object({
   targetDate: optionalDate,
 });
 
-export async function createProject(formData: FormData) {
-  const f = fields(formData);
-  const club = await adminForClub(f.clubId ?? "");
-  const parsed = projectSchema.safeParse(f);
-  if (!parsed.success) fail(parsed);
-  const existing = await db.project.findUnique({ where: { clubId: club.id }, select: { id: true } });
-  if (existing) throw new Error("This club already has a project plan.");
-  await db.project.create({ data: { clubId: club.id, ...parsed.data } });
-  revalidateProject(club.slug);
-  redirect(`/clubs/${club.slug}/project`);
+export async function createProject(_prev: FormState, formData: FormData): Promise<FormState> {
+  let slug: string | null = null;
+  const state = await attempt("Project plan created.", async () => {
+    const f = fields(formData);
+    const club = await adminForClub(f.clubId ?? "");
+    const parsed = projectSchema.safeParse(f);
+    if (!parsed.success) fail(parsed);
+    const existing = await db.project.findUnique({ where: { clubId: club.id }, select: { id: true } });
+    if (existing) throw new Error("This club already has a project plan.");
+    await db.project.create({ data: { clubId: club.id, ...parsed.data } });
+    revalidateProject(club.slug);
+    slug = club.slug;
+  });
+  if (slug) redirect(`/clubs/${slug}/project`);
+  return state;
 }
 
-export async function updateProject(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForProject(f.projectId ?? "");
-  const parsed = projectSchema.safeParse(f);
-  if (!parsed.success) fail(parsed);
-  await db.project.update({ where: { id: ctx.projectId }, data: parsed.data });
-  revalidateProject(ctx.slug);
+export async function updateProject(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Project details saved.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForProject(f.projectId ?? "");
+    const parsed = projectSchema.safeParse(f);
+    if (!parsed.success) fail(parsed);
+    await db.project.update({ where: { id: ctx.projectId }, data: parsed.data });
+    revalidateProject(ctx.slug);
+  });
 }
 
 // ───────────────────────── phases ─────────────────────────
@@ -176,31 +205,37 @@ const phaseSchema = z.object({
   endDate: optionalDate,
 });
 
-export async function createPhase(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForProject(f.projectId ?? "");
-  const parsed = phaseSchema.safeParse(f);
-  if (!parsed.success) fail(parsed);
-  const order = await nextOrder({ projectId: ctx.projectId }, "phase");
-  await db.phase.create({ data: { projectId: ctx.projectId, order, ...parsed.data } });
-  revalidateProject(ctx.slug);
+export async function createPhase(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Phase added.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForProject(f.projectId ?? "");
+    const parsed = phaseSchema.safeParse(f);
+    if (!parsed.success) fail(parsed);
+    const order = await nextOrder({ projectId: ctx.projectId }, "phase");
+    await db.phase.create({ data: { projectId: ctx.projectId, order, ...parsed.data } });
+    revalidateProject(ctx.slug);
+  });
 }
 
-export async function updatePhase(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForPhase(f.phaseId ?? "");
-  const parsed = phaseSchema.extend({ order: orderField }).safeParse(f);
-  if (!parsed.success) fail(parsed);
-  await db.phase.update({ where: { id: ctx.phaseId }, data: parsed.data });
-  revalidateProject(ctx.slug);
+export async function updatePhase(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Phase saved.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForPhase(f.phaseId ?? "");
+    const parsed = phaseSchema.extend({ order: orderField }).safeParse(f);
+    if (!parsed.success) fail(parsed);
+    await db.phase.update({ where: { id: ctx.phaseId }, data: parsed.data });
+    revalidateProject(ctx.slug);
+  });
 }
 
-export async function deletePhase(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForPhase(f.phaseId ?? "");
-  // Workstreams keep existing (phaseId → null via onDelete: SetNull) and show up as "Unscheduled".
-  await db.phase.delete({ where: { id: ctx.phaseId } });
-  revalidateProject(ctx.slug);
+export async function deletePhase(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Phase deleted.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForPhase(f.phaseId ?? "");
+    // Workstreams keep existing (phaseId → null via onDelete: SetNull) and show up as "Unscheduled".
+    await db.phase.delete({ where: { id: ctx.phaseId } });
+    revalidateProject(ctx.slug);
+  });
 }
 
 // ───────────────────────── workstreams ─────────────────────────
@@ -225,51 +260,57 @@ async function checkPhaseAndSubteam(projectId: string, clubId: string, phaseId: 
   }
 }
 
-export async function createWorkstream(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForProject(f.projectId ?? "");
-  const parsed = workstreamSchema.safeParse(f);
-  if (!parsed.success) fail(parsed);
-  const { phaseId, subteamId } = parsed.data;
-  await checkPhaseAndSubteam(ctx.projectId, ctx.clubId, phaseId, subteamId);
-  const dependsOn = await resolveDependsOn(ctx.projectId, null, formData.getAll("dependsOn").map(String));
-  const order = f.order?.trim() ? parsed.data.order : await nextOrder({ projectId: ctx.projectId, phaseId }, "workstream");
-  await db.workstream.create({
-    data: { projectId: ctx.projectId, ...parsed.data, order, dependsOn },
+export async function createWorkstream(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Workstream added.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForProject(f.projectId ?? "");
+    const parsed = workstreamSchema.safeParse(f);
+    if (!parsed.success) fail(parsed);
+    const { phaseId, subteamId } = parsed.data;
+    await checkPhaseAndSubteam(ctx.projectId, ctx.clubId, phaseId, subteamId);
+    const dependsOn = await resolveDependsOn(ctx.projectId, null, formData.getAll("dependsOn").map(String));
+    const order = f.order?.trim() ? parsed.data.order : await nextOrder({ projectId: ctx.projectId, phaseId }, "workstream");
+    await db.workstream.create({
+      data: { projectId: ctx.projectId, ...parsed.data, order, dependsOn },
+    });
+    revalidateProject(ctx.slug);
   });
-  revalidateProject(ctx.slug);
 }
 
-export async function updateWorkstream(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForWorkstream(f.workstreamId ?? "");
-  const parsed = workstreamSchema.safeParse(f);
-  if (!parsed.success) fail(parsed);
-  const { phaseId, subteamId } = parsed.data;
-  await checkPhaseAndSubteam(ctx.projectId, ctx.clubId, phaseId, subteamId);
-  const dependsOn = await resolveDependsOn(ctx.projectId, ctx.workstreamId, formData.getAll("dependsOn").map(String));
-  await db.workstream.update({ where: { id: ctx.workstreamId }, data: { ...parsed.data, dependsOn } });
-  revalidateProject(ctx.slug);
+export async function updateWorkstream(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Workstream saved.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForWorkstream(f.workstreamId ?? "");
+    const parsed = workstreamSchema.safeParse(f);
+    if (!parsed.success) fail(parsed);
+    const { phaseId, subteamId } = parsed.data;
+    await checkPhaseAndSubteam(ctx.projectId, ctx.clubId, phaseId, subteamId);
+    const dependsOn = await resolveDependsOn(ctx.projectId, ctx.workstreamId, formData.getAll("dependsOn").map(String));
+    await db.workstream.update({ where: { id: ctx.workstreamId }, data: { ...parsed.data, dependsOn } });
+    revalidateProject(ctx.slug);
+  });
 }
 
-export async function deleteWorkstream(formData: FormData) {
-  const f = fields(formData);
-  const ctx = await adminForWorkstream(f.workstreamId ?? "");
-  const dependents = await db.workstream.findMany({
-    where: { projectId: ctx.projectId, dependsOn: { has: ctx.workstreamId } },
-    select: { id: true, dependsOn: true },
+export async function deleteWorkstream(_prev: FormState, formData: FormData): Promise<FormState> {
+  return attempt("Workstream deleted.", async () => {
+    const f = fields(formData);
+    const ctx = await adminForWorkstream(f.workstreamId ?? "");
+    const dependents = await db.workstream.findMany({
+      where: { projectId: ctx.projectId, dependsOn: { has: ctx.workstreamId } },
+      select: { id: true, dependsOn: true },
+    });
+    await db.$transaction([
+      ...dependents.map((d) =>
+        db.workstream.update({
+          where: { id: d.id },
+          data: { dependsOn: d.dependsOn.filter((id) => id !== ctx.workstreamId) },
+        }),
+      ),
+      // Tasks keep existing (workstreamId → null via onDelete: SetNull).
+      db.workstream.delete({ where: { id: ctx.workstreamId } }),
+    ]);
+    revalidateProject(ctx.slug);
   });
-  await db.$transaction([
-    ...dependents.map((d) =>
-      db.workstream.update({
-        where: { id: d.id },
-        data: { dependsOn: d.dependsOn.filter((id) => id !== ctx.workstreamId) },
-      }),
-    ),
-    // Tasks keep existing (workstreamId → null via onDelete: SetNull).
-    db.workstream.delete({ where: { id: ctx.workstreamId } }),
-  ]);
-  revalidateProject(ctx.slug);
 }
 
 /** Inline status change from the detail panel. Plain-argument action so client code can call it directly. */

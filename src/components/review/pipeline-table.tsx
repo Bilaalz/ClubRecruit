@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Avatar, Badge, ButtonLink, EmptyState } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { formatRelative, labelFor, recommendationTone, statusTone, type PipelineRow } from "@/lib/review";
+import { formatRelative, type PipelineRow } from "@/lib/review";
+import { applicationStatusTone, labelFor, recommendationTone } from "@/lib/status";
 import { ScoreBar } from "./score-bar";
 
 export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePath: string }) {
@@ -21,7 +22,7 @@ export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePat
 
   return (
     <div className="overflow-x-auto rounded-md border border-line bg-cream-2">
-      <table className="w-full min-w-[840px] text-sm">
+      <table className="w-full min-w-[960px] text-sm">
         <thead>
           <tr className="border-b border-line text-left">
             <Th>Applicant</Th>
@@ -42,7 +43,7 @@ export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePat
               .filter(Boolean)
               .join(" · ");
             return (
-              <tr key={row.id} className="border-b border-line-soft last:border-b-0 hover:bg-cream-3/50">
+              <tr key={row.id} className="border-b border-line-soft last:border-b-0 hover:bg-cream-3/60">
                 <Td>
                   <Link href={href} className="flex items-center gap-3">
                     <Avatar name={row.applicant.name} />
@@ -52,7 +53,7 @@ export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePat
                     </span>
                   </Link>
                 </Td>
-                <Td>
+                <Td className="min-w-[220px]">
                   <span className="block">{row.posting.title}</span>
                   {row.posting.subteam && (
                     <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-ink-4">
@@ -61,8 +62,8 @@ export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePat
                     </span>
                   )}
                 </Td>
-                <Td>
-                  <Badge tone={statusTone[row.status]}>{labelFor(row.status)}</Badge>
+                <Td className="whitespace-nowrap">
+                  <Badge tone={applicationStatusTone[row.status]}>{labelFor(row.status)}</Badge>
                 </Td>
                 <Td>
                   <ScoreBar score={row.evaluation?.overallScore} />
@@ -74,7 +75,7 @@ export function PipelineTable({ rows, basePath }: { rows: PipelineRow[]; basePat
                     <span className="text-ink-4">—</span>
                   )}
                 </Td>
-                <Td>
+                <Td className="whitespace-nowrap">
                   <time dateTime={row.createdAt.toISOString()} title={row.createdAt.toLocaleString("en-CA")} className="text-ink-3">
                     {formatRelative(row.createdAt)}
                   </time>

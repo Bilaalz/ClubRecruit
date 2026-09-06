@@ -1,4 +1,6 @@
-import { Button, Card, CardBody, CardHeader, CardTitle, Field, Input, Select, Textarea } from "@/components/ui";
+"use client";
+
+import { ActionForm, Button, Card, CardBody, CardHeader, CardTitle, Field, Input, Select, Textarea } from "@/components/ui";
 import type { PlanPhase, PlanSubteam, PlanWorkstream, ProjectPlan } from "@/lib/project";
 import {
   createPhase,
@@ -14,8 +16,8 @@ import { ConfirmButton } from "./confirm-button";
 import { STATUS_LABEL, STATUS_ORDER, toDateInput } from "./shared";
 
 /**
- * Admin forms. These are server components that bind directly to server
- * actions; the only client piece is the confirm-before-delete button.
+ * Admin forms. Each binds to a server action through <ActionForm>, which
+ * renders `{ error }` / `{ success }` inline instead of throwing.
  */
 
 // ───────────────────────── project ─────────────────────────
@@ -30,13 +32,13 @@ export function CreateProjectForm({ clubId, clubName }: { clubId: string; clubNa
         </div>
       </CardHeader>
       <CardBody>
-        <form action={createProject} className="space-y-5">
+        <ActionForm action={createProject} className="space-y-5">
           <input type="hidden" name="clubId" value={clubId} />
           <ProjectFields />
           <div className="flex justify-end">
             <Button type="submit">Create project plan</Button>
           </div>
-        </form>
+        </ActionForm>
       </CardBody>
     </Card>
   );
@@ -44,7 +46,7 @@ export function CreateProjectForm({ clubId, clubName }: { clubId: string; clubNa
 
 export function ProjectDetailsForm({ plan }: { plan: ProjectPlan }) {
   return (
-    <form action={updateProject} className="space-y-5">
+    <ActionForm action={updateProject} className="space-y-5">
       <input type="hidden" name="projectId" value={plan.id} />
       <ProjectFields plan={plan} />
       <div className="flex justify-end">
@@ -52,7 +54,7 @@ export function ProjectDetailsForm({ plan }: { plan: ProjectPlan }) {
           Save project details
         </Button>
       </div>
-    </form>
+    </ActionForm>
   );
 }
 
@@ -79,7 +81,7 @@ function ProjectFields({ plan }: { plan?: ProjectPlan }) {
 
 export function PhaseForm({ projectId, phase }: { projectId: string; phase?: PlanPhase }) {
   return (
-    <form action={phase ? updatePhase : createPhase} className="space-y-4">
+    <ActionForm action={phase ? updatePhase : createPhase} className="space-y-4">
       {phase ? <input type="hidden" name="phaseId" value={phase.id} /> : <input type="hidden" name="projectId" value={projectId} />}
       <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
         <Field label="Name">
@@ -107,14 +109,14 @@ export function PhaseForm({ projectId, phase }: { projectId: string; phase?: Pla
           {phase ? "Save phase" : "Add phase"}
         </Button>
       </div>
-    </form>
+    </ActionForm>
   );
 }
 
 export function DeletePhaseForm({ phase }: { phase: PlanPhase }) {
   const n = phase.workstreams.length;
   return (
-    <form action={deletePhase}>
+    <ActionForm action={deletePhase}>
       <input type="hidden" name="phaseId" value={phase.id} />
       <ConfirmButton
         variant="danger"
@@ -127,7 +129,7 @@ export function DeletePhaseForm({ phase }: { phase: PlanPhase }) {
       >
         Delete phase
       </ConfirmButton>
-    </form>
+    </ActionForm>
   );
 }
 
@@ -154,7 +156,7 @@ export function WorkstreamForm({
   const groups = [...phases.map((p) => ({ key: p.id, label: p.name, items: others.filter((w) => w.phaseId === p.id) })), { key: "__none", label: "Unscheduled", items: others.filter((w) => !w.phaseId || !phases.some((p) => p.id === w.phaseId)) }].filter((g) => g.items.length);
 
   return (
-    <form action={ws ? updateWorkstream : createWorkstream} className="space-y-4">
+    <ActionForm action={ws ? updateWorkstream : createWorkstream} className="space-y-4">
       {ws ? <input type="hidden" name="workstreamId" value={ws.id} /> : <input type="hidden" name="projectId" value={projectId} />}
       <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
         <Field label="Name">
@@ -231,7 +233,7 @@ export function WorkstreamForm({
           {ws ? "Save workstream" : "Add workstream"}
         </Button>
       </div>
-    </form>
+    </ActionForm>
   );
 }
 
@@ -241,11 +243,11 @@ export function DeleteWorkstreamForm({ ws }: { ws: PlanWorkstream }) {
     ws.taskTotal ? `${ws.taskTotal} task${ws.taskTotal === 1 ? "" : "s"} will be unlinked (not deleted)` : null,
   ].filter(Boolean);
   return (
-    <form action={deleteWorkstream}>
+    <ActionForm action={deleteWorkstream}>
       <input type="hidden" name="workstreamId" value={ws.id} />
       <ConfirmButton variant="danger" size="sm" message={`Delete workstream "${ws.name}"?${parts.length ? ` ${parts.join("; ")}.` : ""}`}>
         Delete workstream
       </ConfirmButton>
-    </form>
+    </ActionForm>
   );
 }

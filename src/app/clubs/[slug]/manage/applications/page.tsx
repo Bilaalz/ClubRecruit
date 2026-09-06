@@ -5,15 +5,17 @@ import { PageHeader } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   isApplicationStatus,
-  labelFor,
   listPipeline,
   listPostingOptions,
   pipelineCounts,
   STATUS_ORDER,
   type PipelineSort,
 } from "@/lib/review";
+import { labelFor } from "@/lib/status";
 import { PipelineFilters } from "@/components/review/pipeline-filters";
 import { PipelineTable } from "@/components/review/pipeline-table";
+
+export const metadata = { title: "Applications" };
 
 type SearchParams = { posting?: string; status?: string; sort?: string };
 
