@@ -21,3 +21,9 @@
 
 - Tasks reference `Workstream` (optional) and `Membership` as assignee (optional).
 - Keep ordering with an integer `order` per column; renumber on move.
+
+## Requests
+
+- No shared-file changes needed. Everything lives in the files listed above plus `src/components/board/shared.ts` (client-safe constants/types imported by both `src/lib/tasks.ts` and the client components).
+- The board page renders only its own content container and assumes `src/app/clubs/[slug]/layout.tsx` (club header + sub-nav, built in parallel) wraps it. Nothing to change there; just noting the dependency.
+- `moveTask` / `createTask` / `updateTask` / `deleteTask` revalidate `/clubs/[slug]/project` as well as the board, since Stage 3 shows done/total per workstream.
