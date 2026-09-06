@@ -23,3 +23,17 @@
 
 - `evaluateApplication` is imported from `src/lib/ai/evaluate.ts` (Stage 4). If it is not there yet when you start, write against the signature `evaluateApplication(applicationId: string): Promise<void>`.
 - Authorization: `requireClubAdmin(clubId)` in every action.
+
+## Built
+
+- `/clubs/[slug]/manage/applications` — pipeline with per-status count chips, posting/status/sort filters (GET form, state in the URL), table sorted by AI score then newest (`?sort=newest` alternative), empty state.
+- `/clubs/[slug]/manage/applications/[id]` — header (applicant, posting, status, applied), decision bar (Accept dialog with title/subteam/role/note, Reject dialog with note, Reopen decision), and the Resume / Interview / AI evaluation panels.
+- `src/lib/review.ts` (queries, local tone maps, formatting, Json parsers), `src/lib/review-actions.ts` (`acceptApplication`, `rejectApplication`, `reopenApplication`, `rerunEvaluation` — all go through `requireClubAdmin` on the club that owns the posting), `src/components/review/*`.
+- Pages use the same guard as the other manage pages (`getClubContext` → 404 / redirect to `/clubs/[slug]`); the actions are where `requireClubAdmin` is enforced.
+
+## Requests
+
+- **Stage 8 / `src/lib/status.ts`:** `src/lib/review.ts` carries a local `statusTone`, `recommendationTone` and `labelFor`. Please move `recommendationTone` (STRONG_YES/YES → ok, MAYBE → warn, NO → bad) into `status.ts` and switch `review.ts` and `src/components/review/*` to import from there.
+- **Stage 4 / `src/lib/ai/evaluate.ts`:** both `evaluate.ts` and `review.ts` define a `parseTranscript(json)` guard for the Interview `transcript` Json (plus `parseRubric` in `review.ts`). Worth a single shared module (e.g. `src/lib/interview-json.ts`) so the shape is validated in one place.
+- **UI primitives:** `AcceptDialog` and `RejectDialog` each hand-roll a `<dialog>` (cream-2 panel, `backdrop:bg-ink/40`, click-outside to close). If another stage needs a modal, a `Dialog` primitive in `src/components/ui` would remove the duplication; `SubmitButton` (pending label via `useFormStatus`) in `src/components/review/submit-button.tsx` is likewise generic.
+- **Accept semantics to confirm:** accepting an applicant who is already an OWNER/ADMIN of the club updates their title/subteam but never demotes them; choosing "Lead" only promotes an existing MEMBER. Reopening a decision keeps the membership (the UI says so). If the product wants reopen-after-accept to remove the membership, that is a one-line change in `reopenApplication`.
