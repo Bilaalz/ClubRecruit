@@ -1,5 +1,16 @@
-import { SUBTEAM_COLORS } from "@/lib/clubs";
 import { cn } from "@/lib/cn";
+
+/** Muted palette for subteam colors. Stays legible on cream. Dependency-free so it can ship to the client. */
+export const SUBTEAM_COLORS = [
+  "#3B5B7C", // slate blue
+  "#7C5A3B", // umber
+  "#5F7C3B", // moss
+  "#7C3B5F", // plum
+  "#3B7C74", // teal
+  "#7C6E3B", // ochre
+  "#5B3B7C", // violet
+  "#6B6B6B", // grey
+] as const;
 
 /** Radio-group palette; works without JS. `name` defaults to "color". */
 export function ColorPalette({ name = "color", value, idPrefix }: { name?: string; value?: string; idPrefix: string }) {
