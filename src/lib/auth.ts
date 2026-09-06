@@ -1,45 +1,33 @@
-import { cookies } from "next/headers";
-import { cache } from "react";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { getSessionUser, SESSION_COOKIE } from "@/lib/session";
 import type { MembershipRole } from "@/generated/prisma/enums";
 
 /**
- * Demo auth (Stage 1–6). A cookie holds the current persona's user id.
- * Stage 7 swaps the internals for real sessions; keep these exports stable.
+ * Auth helpers. Backed by the `Session` table + `cr_session` cookie (see `session.ts`).
+ * Signed out means `null`; there is no default persona.
  */
-export const DEMO_COOKIE = "cr_demo_user";
-export const DEFAULT_DEMO_EMAIL = "priya@utoronto.ca";
-
-export type CurrentUser = NonNullable<Awaited<ReturnType<typeof loadUser>>>;
-
-async function loadUser(userId: string | undefined) {
-  const where = userId ? { id: userId } : { email: DEFAULT_DEMO_EMAIL };
-  return db.user.findUnique({
-    where,
-    include: {
-      university: true,
-      memberships: {
-        include: { club: { select: { id: true, slug: true, name: true } }, subteam: true },
-        orderBy: { joinedAt: "asc" },
-      },
-    },
-  });
-}
+export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
 
 /** Current user or null. Memoised per request. */
-export const getCurrentUser = cache(async () => {
-  const jar = await cookies();
-  const id = jar.get(DEMO_COOKIE)?.value;
-  const user = await loadUser(id);
-  if (!user && id) return loadUser(undefined); // stale cookie → fall back to default persona
-  return user;
-});
+export const getCurrentUser = getSessionUser;
 
+/** Path of the current request, as stamped by `proxy.ts`. Falls back to `/dashboard`. */
+async function currentPath() {
+  const h = await headers();
+  const p = h.get("x-pathname");
+  return p && p.startsWith("/") ? p : "/dashboard";
+}
+
+/** Signed-in user, or redirect to `/login?next=<here>`. A stale cookie is cleared via `/logout` first. */
 export async function requireUser() {
   const user = await getCurrentUser();
-  if (!user) redirect("/switch-user");
-  return user;
+  if (user) return user;
+  const next = encodeURIComponent(await currentPath());
+  const jar = await cookies();
+  if (jar.get(SESSION_COOKIE)) redirect(`/logout?next=${next}`);
+  redirect(`/login?next=${next}`);
 }
 
 export function membershipFor(user: CurrentUser, clubId: string) {
@@ -82,4 +70,28 @@ export async function getClubContext(slug: string) {
     isMember: !!membership,
     isAdmin: !!membership && ADMIN_ROLES.includes(membership.role),
   };
+}
+
+// ───────────────────────── Signup domain policy (pure) ─────────────────────────
+
+export type UniversityDomains = { domain: string; altDomains: string[] };
+
+/** The university whose `domain` or `altDomains` matches the email's domain, or null. Case-insensitive. */
+export function universityForEmail<U extends UniversityDomains>(email: string, universities: U[]): U | null {
+  const at = email.lastIndexOf("@");
+  if (at < 1 || at === email.length - 1) return null;
+  const domain = email.slice(at + 1).trim().toLowerCase();
+  return universities.find((u) => u.domain.toLowerCase() === domain || u.altDomains.some((d) => d.toLowerCase() === domain)) ?? null;
+}
+
+export function isAllowedEmail(email: string, universities: UniversityDomains[]) {
+  return universityForEmail(email, universities) !== null;
+}
+
+/** Only allow same-origin relative paths as post-login destinations. */
+export function safeNext(next: unknown, fallback = "/dashboard") {
+  if (typeof next !== "string") return fallback;
+  if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return fallback;
+  if (next === "/login" || next === "/signup" || next.startsWith("/login?") || next.startsWith("/signup?") || next.startsWith("/logout")) return fallback;
+  return next;
 }
