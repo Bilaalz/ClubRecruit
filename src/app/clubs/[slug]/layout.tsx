@@ -8,7 +8,7 @@ import { labelFor } from "@/lib/status";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const club = await getClubHeader(slug);
-  // Pages inside the club get "Board · UofT World Cup Club"; the overview keeps the root template.
+  // Pages inside the club get "Board · University of Toronto World Cup Club"; the overview keeps the root template.
   const name = club ? club.name : "Club";
   return { title: { default: name, template: `%s · ${name}` } };
 }

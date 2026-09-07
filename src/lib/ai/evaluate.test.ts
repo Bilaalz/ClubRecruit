@@ -16,7 +16,7 @@ const { MOCK_MODEL } = await import("./mock");
 const input: EvaluationInput = {
   posting: {
     title: "Web Developer — Fixtures & Standings",
-    clubName: "UofT World Cup Club",
+    clubName: "University of Toronto World Cup Club",
     subteamName: "Technology",
     description: "Work on the tournament platform.",
     requirements: ["JavaScript or TypeScript", "React fundamentals"],

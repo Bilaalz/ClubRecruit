@@ -5,7 +5,7 @@ import { EvaluationResultSchema, recommendationForScore, type EvaluationInput } 
 
 const posting: EvaluationInput["posting"] = {
   title: "Web Developer — Fixtures & Standings",
-  clubName: "UofT World Cup Club",
+  clubName: "University of Toronto World Cup Club",
   subteamName: "Technology",
   description: "Work on the tournament platform: team registration, the fixture list and the live standings table.",
   requirements: ["JavaScript or TypeScript", "React fundamentals", "Comfortable on the Linux command line"],

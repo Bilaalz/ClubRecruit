@@ -46,7 +46,7 @@ async function main() {
   const mk = (email: string, name: string, program: string, year: number, bio?: string) =>
     db.user.create({ data: { email, name, program, year, bio, passwordHash, universityId: uoft.id } });
 
-  const priya = await mk("priya@utoronto.ca", "Priya Sharma", "Engineering Science", 4, "President, UofT World Cup Club.");
+  const priya = await mk("priya@utoronto.ca", "Priya Sharma", "Engineering Science", 4, "President, UTWC 26.");
   const marcus = await mk("marcus@utoronto.ca", "Marcus Lee", "Computer Science", 3, "Technology lead. Fixtures, standings, too much coffee.");
   const hana = await mk("hana@utoronto.ca", "Hana Kim", "Kinesiology & Physical Education", 4, "Operations lead.");
   const ravi = await mk("ravi@utoronto.ca", "Ravi Iyer", "Cinema Studies", 3);
@@ -64,14 +64,14 @@ async function main() {
   const omar = await mk("omar@mail.utoronto.ca", "Omar Farouk", "Kinesiology & Physical Education", 2);
   await mk("newstudent@mail.utoronto.ca", "Taylor Nguyen", "Statistics & Computer Science", 1);
 
-  // ── Club: World Cup ────────────────────────────────────────
+  // ── Club: UTWC 26 ──────────────────────────────────────────
   const worldCup = await db.club.create({
     data: {
-      slug: "worldcup",
-      name: "UofT World Cup Club",
-      tagline: "Thirty-two teams, one campus, one trophy.",
+      slug: "utwc26",
+      name: "University of Toronto World Cup Club",
+      tagline: "UTWC 26 — thirty-two teams, one campus, one trophy.",
       description:
-        "The UofT World Cup Club runs the university's annual World Cup: a 32-team tournament where student communities field national sides across six weekends of group and knockout football, with watch parties, a media desk covering every match, and five-a-side leagues in between. Members work in subteams that own a real slice of the tournament, from the fixture schedule to the standings site.",
+        "UTWC 26 ran the University of Toronto's build-up to the 2026 World Cup, from September 2025 to April 2026: a 32-team campus tournament where student communities fielded national sides across six weekends of group and knockout football, watch parties through the term, and a media desk covering every match. Members worked in subteams that owned a real slice of the tournament, from the fixture schedule to the standings site.",
       universityId: uoft.id,
     },
   });
@@ -86,12 +86,14 @@ async function main() {
   const member = (userId: string, role: "OWNER" | "ADMIN" | "LEAD" | "MEMBER", subteamId?: string, title?: string, joined = 300) =>
     db.membership.create({ data: { userId, clubId: worldCup.id, role, subteamId, title, joinedAt: daysAgo(joined) } });
 
-  const mPriya = await member(priya.id, "OWNER", undefined, "President", 700);
-  const mMarcus = await member(marcus.id, "LEAD", technology.id, "Technology Lead", 400);
-  const mHana = await member(hana.id, "ADMIN", operations.id, "Operations Lead", 650);
-  const mRavi = await member(ravi.id, "MEMBER", media.id, "Video & Recaps", 200);
-  const mNoor = await member(noor.id, "LEAD", partnerships.id, "Partnerships Lead", 380);
-  const mChloe = await member(chloe.id, "MEMBER", technology.id, "Frontend Developer", 30);
+  // The club ran from September 2025 (~365 days ago) to April 2026 (~130), so every
+  // date below is an offset inside that window.
+  const mPriya = await member(priya.id, "OWNER", undefined, "President", 365);
+  const mMarcus = await member(marcus.id, "LEAD", technology.id, "Technology Lead", 360);
+  const mHana = await member(hana.id, "ADMIN", operations.id, "Operations Lead", 365);
+  const mRavi = await member(ravi.id, "MEMBER", media.id, "Video & Recaps", 300);
+  const mNoor = await member(noor.id, "LEAD", partnerships.id, "Partnerships Lead", 355);
+  const mChloe = await member(chloe.id, "MEMBER", technology.id, "Frontend Developer", 250);
 
   // ── Club: Debate ───────────────────────────────────────────
   const debate = await db.club.create({
@@ -118,7 +120,6 @@ async function main() {
       interviewQuestions: ["Tell us about your debate background.", "How would you give feedback to a nervous novice after a rough round?"],
       openings: 2,
       status: "OPEN",
-      closesAt: daysFromNow(21),
     },
   });
 
@@ -144,12 +145,11 @@ async function main() {
         "Tell us about a technical project you're proud of. What was hard about it?",
         "How would you keep the standings table correct when a result is corrected hours after full time?",
         "Describe a time you disagreed with a teammate about a technical decision. What happened?",
-        "Why the World Cup Club, and why this role?",
+        "Why UTWC 26, and why this role?",
       ],
       openings: 3,
       status: "OPEN",
-      closesAt: daysFromNow(14),
-      createdAt: daysAgo(20),
+      createdAt: daysAgo(350),
     },
   });
 
@@ -169,8 +169,7 @@ async function main() {
       ],
       openings: 2,
       status: "OPEN",
-      closesAt: daysFromNow(10),
-      createdAt: daysAgo(18),
+      createdAt: daysAgo(345),
     },
   });
 
@@ -189,8 +188,8 @@ async function main() {
       ],
       openings: 1,
       status: "CLOSED",
-      closesAt: daysAgo(5),
-      createdAt: daysAgo(40),
+      closesAt: daysAgo(200),
+      createdAt: daysAgo(340),
     },
   });
 
@@ -205,12 +204,11 @@ async function main() {
       interviewQuestions: [
         "Tell us about something you've organised from scratch.",
         "A sponsor goes quiet two weeks before a payment is due. What do you do?",
-        "Why the World Cup Club?",
+        "Why UTWC 26?",
       ],
       openings: 1,
       status: "OPEN",
-      closesAt: daysFromNow(30),
-      createdAt: daysAgo(12),
+      createdAt: daysAgo(330),
     },
   });
 
@@ -225,7 +223,7 @@ async function main() {
       interviewQuestions: ["Tell us about photography work you've done."],
       openings: 1,
       status: "DRAFT",
-      createdAt: daysAgo(2),
+      createdAt: daysAgo(320),
     },
   });
 
@@ -298,7 +296,7 @@ async function main() {
     resumeKey: "technology",
     answers: "strong",
     stage: "UNDER_REVIEW",
-    ageDays: 6,
+    ageDays: 320,
     coverNote: "I've been at the last two finals and want to work on the standings page that everyone refreshes at full time.",
     evaluation: {
       score: 88,
@@ -327,7 +325,7 @@ async function main() {
     resumeKey: "operations",
     answers: "strong",
     stage: "UNDER_REVIEW",
-    ageDays: 5,
+    ageDays: 315,
     evaluation: {
       score: 84,
       rec: "STRONG_YES",
@@ -351,7 +349,7 @@ async function main() {
     resumeKey: "media",
     answers: "medium",
     stage: "UNDER_REVIEW",
-    ageDays: 9,
+    ageDays: 310,
     evaluation: {
       score: 71,
       rec: "YES",
@@ -375,7 +373,7 @@ async function main() {
     resumeKey: "partnerships",
     answers: "strong",
     stage: "UNDER_REVIEW",
-    ageDays: 3,
+    ageDays: 300,
     evaluation: {
       score: 79,
       rec: "YES",
@@ -399,7 +397,7 @@ async function main() {
     resumeKey: "generic",
     answers: "weak",
     stage: "REJECTED",
-    ageDays: 12,
+    ageDays: 325,
     decisionNote: "Encouraged Sam to volunteer on a match window this term and re-apply in January.",
     evaluation: {
       score: 38,
@@ -418,17 +416,17 @@ async function main() {
     },
   });
 
-  await apply({ posting: pTech, applicant: leila, resumeKey: "technology", stage: "SUBMITTED", ageDays: 1, coverNote: "Second-year CS, have built a couple of Next.js side projects and would love to work on the standings page." });
-  await apply({ posting: pOps, applicant: omar, resumeKey: "operations", answers: "medium", stage: "INTERVIEW_COMPLETE", ageDays: 2 });
+  await apply({ posting: pTech, applicant: leila, resumeKey: "technology", stage: "SUBMITTED", ageDays: 305, coverNote: "Second-year CS, have built a couple of Next.js side projects and would love to work on the standings page." });
+  await apply({ posting: pOps, applicant: omar, resumeKey: "operations", answers: "medium", stage: "INTERVIEW_COMPLETE", ageDays: 308 });
 
-  // Chloe was accepted last month → she is already a member (created above)
+  // Chloe was accepted mid-season → she is already a member (created above)
   await apply({
     posting: pTech,
     applicant: chloe,
     resumeKey: "technology",
     answers: "strong",
     stage: "ACCEPTED",
-    ageDays: 34,
+    ageDays: 280,
     decisionNote: "Accepted as Frontend Developer on Technology.",
     evaluation: {
       score: 82,
@@ -450,44 +448,46 @@ async function main() {
   const project = await db.project.create({
     data: {
       clubId: worldCup.id,
-      name: "World Cup 2027",
+      name: "World Cup 2026",
       summary:
-        "Plan and run the 2027 campus World Cup: 32 teams, six weekends of group and knockout football, watch parties, and a full stand for the final on 12 June.",
+        "The club's run from September 2025 to April 2026, building up to the 2026 World Cup: a 32-team campus tournament, six weekends of group and knockout football, watch parties through the term, and a media desk on every match.",
       goals: [
         "32 teams and 500+ registered players",
         "Every match window kicks off on time",
         "Raise $60k in cash and in-kind sponsorship",
-        "Ship a documented, reusable registration and standings platform for 2028",
+        "Leave behind a documented, reusable registration and standings platform",
       ],
-      targetDate: new Date("2027-06-12"),
+      targetDate: new Date("2026-04-30"),
     },
   });
 
   const [phFormat, phTeams, phBuildUp, phTournament] = await Promise.all([
-    db.phase.create({ data: { projectId: project.id, name: "Format & Requirements", description: "Tournament format, rules, budget, platform architecture.", order: 0, startDate: new Date("2026-09-08"), endDate: new Date("2026-10-31") } }),
-    db.phase.create({ data: { projectId: project.id, name: "Teams & Partners", description: "Registration, sponsorship, venues, content plan.", order: 1, startDate: new Date("2026-11-01"), endDate: new Date("2027-01-31") } }),
-    db.phase.create({ data: { projectId: project.id, name: "Build-up", description: "Platform build, referee training, kit, promotion.", order: 2, startDate: new Date("2027-02-01"), endDate: new Date("2027-04-30") } }),
-    db.phase.create({ data: { projectId: project.id, name: "Tournament", description: "Dry run, group stage, knockouts, the final.", order: 3, startDate: new Date("2027-05-01"), endDate: new Date("2027-06-12") } }),
+    db.phase.create({ data: { projectId: project.id, name: "Format & Requirements", description: "Tournament format, rules, budget, platform architecture.", order: 0, startDate: new Date("2025-09-08"), endDate: new Date("2025-10-31") } }),
+    db.phase.create({ data: { projectId: project.id, name: "Teams & Partners", description: "Registration, sponsorship, venues, content plan.", order: 1, startDate: new Date("2025-11-01"), endDate: new Date("2026-01-15") } }),
+    db.phase.create({ data: { projectId: project.id, name: "Build-up", description: "Platform build, referee training, kit, promotion.", order: 2, startDate: new Date("2026-01-16"), endDate: new Date("2026-02-28") } }),
+    db.phase.create({ data: { projectId: project.id, name: "Tournament", description: "Dry run, group stage, knockouts, the final.", order: 3, startDate: new Date("2026-03-01"), endDate: new Date("2026-04-30") } }),
   ]);
 
   const ws = async (name: string, phaseId: string, subteamId: string | null, status: "PLANNED" | "ACTIVE" | "BLOCKED" | "DONE", order: number, description: string, dependsOn: string[] = []) =>
     db.workstream.create({ data: { projectId: project.id, phaseId, subteamId, name, status, order, description, dependsOn } });
 
+  // The season is over, so most workstreams landed. The two that did not are the
+  // interesting ones on the flow canvas: a blocked pipeline and a cut feature.
   const wRules = await ws("Format, rules & budget", phFormat.id, operations.id, "DONE", 0, "Group and knockout structure, eligibility, discipline policy, and the tournament budget.");
-  const wArch = await ws("Platform architecture", phFormat.id, technology.id, "DONE", 1, "Registration, fixtures, standings and ticketing; the data each subteam owns and hands over.", [wRules.id]);
-  const wSponsor = await ws("Sponsorship & funding", phFormat.id, partnerships.id, "ACTIVE", 2, "Raise $60k in cash and in-kind sponsorship; maintain sponsor pipeline.");
+  const wArch = await ws("Platform architecture", phFormat.id, technology.id, "DONE", 1, "Registration, fixtures, standings and ticketing; the data each subteam owned and handed over.", [wRules.id]);
+  const wSponsor = await ws("Sponsorship & funding", phFormat.id, partnerships.id, "DONE", 2, "Raised $60k in cash and in-kind sponsorship; ran the sponsor pipeline all season.");
 
-  const wVenues = await ws("Venues & fixture schedule", phTeams.id, operations.id, "ACTIVE", 0, "Book pitches for six weekends and schedule 48 group matches around them.", [wRules.id, wArch.id]);
-  const wReferees = await ws("Referee recruitment & training", phTeams.id, operations.id, "ACTIVE", 1, "Recruit 16 referees, run certification and the pre-tournament briefing.", [wRules.id]);
-  const wContent = await ws("Brand, kit & content plan", phTeams.id, media.id, "ACTIVE", 2, "Team crests, kit, the shot list per match window, and the recap format.", [wArch.id]);
-  const wPlatform = await ws("Registration & standings platform", phTeams.id, technology.id, "ACTIVE", 3, "Team registration, payments, the fixture list and a live standings table with tiebreakers.", [wArch.id]);
+  const wVenues = await ws("Venues & fixture schedule", phTeams.id, operations.id, "DONE", 0, "Booked pitches for six weekends and scheduled 48 group matches around them.", [wRules.id, wArch.id]);
+  const wReferees = await ws("Referee recruitment & training", phTeams.id, operations.id, "DONE", 1, "Recruited 16 referees, ran certification and the pre-tournament briefing.", [wRules.id]);
+  const wContent = await ws("Brand, kit & content plan", phTeams.id, media.id, "DONE", 2, "Team crests, kit, the shot list per match window, and the recap format.", [wArch.id]);
+  const wPlatform = await ws("Registration & standings platform", phTeams.id, technology.id, "DONE", 3, "Team registration, payments, the fixture list and a live standings table with tiebreakers.", [wArch.id]);
 
-  const wMatchOps = await ws("Match-day operations plan", phBuildUp.id, operations.id, "PLANNED", 0, "Volunteer rota, kit and equipment per pitch, run of play per window.", [wVenues.id]);
-  const wRecaps = await ws("Recap pipeline & match-day crew", phBuildUp.id, media.id, "BLOCKED", 1, "Camera crew per pitch and the same-night edit; blocked on the final fixture schedule.", [wContent.id, wVenues.id]);
-  const wTicketing = await ws("Ticketing & live scores", phBuildUp.id, technology.id, "PLANNED", 2, "Ticket sales for the final, live score entry from the pitch, public standings page.", [wPlatform.id, wContent.id]);
+  const wMatchOps = await ws("Match-day operations plan", phBuildUp.id, operations.id, "DONE", 0, "Volunteer rota, kit and equipment per pitch, run of play per window.", [wVenues.id]);
+  const wRecaps = await ws("Recap pipeline & match-day crew", phBuildUp.id, media.id, "BLOCKED", 1, "Camera crew per pitch and the same-night edit; stalled on the fixture schedule and never fully staffed.", [wContent.id, wVenues.id]);
+  const wTicketing = await ws("Ticketing & live scores", phBuildUp.id, technology.id, "PLANNED", 2, "Ticket sales for the final and live score entry from the pitch; cut for time, and the season ran without it.", [wPlatform.id, wContent.id]);
 
-  const wDryRun = await ws("Pre-season dry run", phTournament.id, operations.id, "PLANNED", 0, "Two rehearsal match windows; checklist per system from kickoff to published recap.", [wMatchOps.id, wRecaps.id, wTicketing.id]);
-  await ws("World Cup 2027 tournament", phTournament.id, partnerships.id, "PLANNED", 1, "Group stage, knockouts and the final: logistics, watch parties, sponsor activations, media.", [wDryRun.id, wSponsor.id]);
+  const wDryRun = await ws("Pre-season dry run", phTournament.id, operations.id, "DONE", 0, "Two rehearsal match windows; checklist per system from kickoff to published recap.", [wMatchOps.id, wRecaps.id, wTicketing.id]);
+  await ws("World Cup 2026", phTournament.id, partnerships.id, "DONE", 1, "Group stage, knockouts and the final: logistics, watch parties, sponsor activations, media.", [wDryRun.id, wSponsor.id]);
 
   // ── Tasks ──────────────────────────────────────────────────
   type TS = "BACKLOG" | "TODO" | "IN_PROGRESS" | "IN_REVIEW" | "DONE";
@@ -508,35 +508,38 @@ async function main() {
       },
     });
 
-  await task("Finalise tournament budget spreadsheet", "DONE", wRules.id, mHana.id, "HIGH", -20);
-  await task("Write the discipline and appeals policy", "DONE", wRules.id, mHana.id, "HIGH", -16);
-  await task("Agree the fixtures and results data model", "DONE", wArch.id, mMarcus.id, "HIGH", -14);
-  await task("Choose hosting: managed Postgres vs a college VM", "DONE", wArch.id, mMarcus.id, "MEDIUM", -10);
-  await task("Send Q4 sponsor deck to 30 companies", "DONE", wSponsor.id, mNoor.id, "HIGH", -7);
-  await task("Follow up with Adidas Canada on in-kind kit", "IN_PROGRESS", wSponsor.id, mNoor.id, "HIGH", 3);
-  await task("Pitch availability study across six weekends", "IN_REVIEW", wVenues.id, mHana.id, "HIGH", 2, "Compare 3 venue combinations for travel time vs. cost.");
-  await task("Confirm group-stage pitch bookings", "IN_PROGRESS", wVenues.id, mHana.id, "HIGH", 5, "Media is blocked on this — send the draft schedule even if dates shift.");
-  await task("Fixture draw with no team playing twice in a window", "TODO", wVenues.id, null, "MEDIUM", 12);
-  await task("Referee certification session 2", "IN_PROGRESS", wReferees.id, mHana.id, "MEDIUM", 8);
-  await task("Pre-tournament referee briefing pack", "BACKLOG", wReferees.id, null, "LOW");
-  await task("Recap format review — 60s vertical cut", "IN_REVIEW", wContent.id, mRavi.id, "HIGH", 1);
-  await task("Pick the kit supplier and crest template", "DONE", wContent.id, mRavi.id, "MEDIUM", -3);
-  await task("Shot list per match window", "TODO", wContent.id, mRavi.id, "HIGH", 14);
-  await task("Registration flow with payment stub", "IN_PROGRESS", wPlatform.id, mChloe.id, "HIGH", 6);
-  await task("Standings table with head-to-head tiebreakers", "IN_PROGRESS", wPlatform.id, mChloe.id, "MEDIUM", 9);
-  await task("Fixture list page and calendar export", "TODO", wPlatform.id, mMarcus.id, "HIGH", 16);
-  await task("Import last season's team rosters", "TODO", wPlatform.id, null, "MEDIUM", 18);
-  await task("Seed data for a 32-team dry run", "BACKLOG", wPlatform.id, null, "LOW");
-  await task("Order corner flags, bibs and match balls", "BACKLOG", wMatchOps.id, null, "MEDIUM");
-  await task("Camera crew rota per pitch", "BACKLOG", wRecaps.id, mRavi.id, "MEDIUM");
+  // Finished work carries the date it was due during the season. What never got
+  // finished has no due date rather than a year of overdue.
+  await task("Finalise tournament budget spreadsheet", "DONE", wRules.id, mHana.id, "HIGH", -350);
+  await task("Write the discipline and appeals policy", "DONE", wRules.id, mHana.id, "HIGH", -340);
+  await task("Agree the fixtures and results data model", "DONE", wArch.id, mMarcus.id, "HIGH", -335);
+  await task("Choose hosting: managed Postgres vs a college VM", "DONE", wArch.id, mMarcus.id, "MEDIUM", -330);
+  await task("Send Q4 sponsor deck to 30 companies", "DONE", wSponsor.id, mNoor.id, "HIGH", -320);
+  await task("Follow up with Adidas Canada on in-kind kit", "DONE", wSponsor.id, mNoor.id, "HIGH", -300);
+  await task("Pitch availability study across six weekends", "DONE", wVenues.id, mHana.id, "HIGH", -295, "Compared 3 venue combinations for travel time vs. cost.");
+  await task("Confirm group-stage pitch bookings", "DONE", wVenues.id, mHana.id, "HIGH", -280, "Media was blocked on this until the draft schedule went out.");
+  await task("Fixture draw with no team playing twice in a window", "DONE", wVenues.id, null, "MEDIUM", -265);
+  await task("Referee certification session 2", "DONE", wReferees.id, mHana.id, "MEDIUM", -250);
+  await task("Pre-tournament referee briefing pack", "DONE", wReferees.id, null, "LOW", -215);
+  await task("Recap format review — 60s vertical cut", "DONE", wContent.id, mRavi.id, "HIGH", -240);
+  await task("Pick the kit supplier and crest template", "DONE", wContent.id, mRavi.id, "MEDIUM", -270);
+  await task("Shot list per match window", "DONE", wContent.id, mRavi.id, "HIGH", -220);
+  await task("Registration flow with payment stub", "DONE", wPlatform.id, mChloe.id, "HIGH", -235);
+  await task("Standings table with head-to-head tiebreakers", "DONE", wPlatform.id, mChloe.id, "MEDIUM", -225);
+  await task("Fixture list page and calendar export", "DONE", wPlatform.id, mMarcus.id, "HIGH", -210);
+  await task("Seed data for a 32-team dry run", "DONE", wPlatform.id, null, "LOW", -230);
+  await task("Order corner flags, bibs and match balls", "DONE", wMatchOps.id, null, "MEDIUM", -195);
+  await task("Book the stadium for the final", "DONE", wDryRun.id, mPriya.id, "MEDIUM", -175);
+  await task("Onboard the new technology recruits", "DONE", null, mMarcus.id, "MEDIUM", -245, "Set up the repo, local Postgres and seed data for the incoming cohort.");
+  await task("Import the team rosters from registration", "IN_REVIEW", wPlatform.id, null, "MEDIUM");
+  await task("Camera crew rota per pitch", "IN_PROGRESS", wRecaps.id, mRavi.id, "MEDIUM");
+  await task("Ticket sales page for the final", "TODO", wTicketing.id, mMarcus.id, "MEDIUM");
   await task("Live score entry from a phone", "BACKLOG", wTicketing.id, mMarcus.id, "LOW");
-  await task("Book the stadium for the final", "TODO", wDryRun.id, mPriya.id, "MEDIUM", 25);
-  await task("Onboard new technology recruits", "TODO", null, mMarcus.id, "MEDIUM", 7, "Set up the repo, local Postgres and seed data for the incoming cohort.");
 
   console.log("Seeded ✓");
   console.log("");
   console.log(`Demo accounts (password for all: "${DEMO_PASSWORD}")`);
-  console.log("  priya@utoronto.ca            club owner (UofT World Cup Club)");
+  console.log("  priya@utoronto.ca            club owner (UTWC 26)");
   console.log("  marcus@utoronto.ca           technology lead");
   console.log("  aisha@mail.utoronto.ca       applicant");
   console.log("  newstudent@mail.utoronto.ca  new student, no clubs");

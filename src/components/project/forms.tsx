@@ -62,7 +62,7 @@ function ProjectFields({ plan }: { plan?: ProjectPlan }) {
   return (
     <>
       <Field label="Project name">
-        <Input name="name" required maxLength={120} defaultValue={plan?.name ?? ""} placeholder="World Cup 2027" />
+        <Input name="name" required maxLength={120} defaultValue={plan?.name ?? ""} placeholder="World Cup 2026" />
       </Field>
       <Field label="Summary" hint="One paragraph: what are you building and where does it end up?">
         <Textarea name="summary" required maxLength={2000} defaultValue={plan?.summary ?? ""} />

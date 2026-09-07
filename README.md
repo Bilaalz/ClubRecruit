@@ -4,11 +4,11 @@
 
 ClubRecruit is a recruiting and team-operations platform for university clubs. A club posts roles per subteam, students apply with a resume and a short recorded interview, Claude scores the interview against a rubric, and club admins review, accept and assign applicants — who then land on a kanban board wired to the club's project plan.
 
-The workflow is modelled on how the University of Toronto World Cup club — which I am a member of — actually recruits and runs a season: hiring into subteams rather than one general intake, a resume-plus-interview funnel with a consistent rubric, and accepted members landing directly on the work their subteam owns.
+The workflow is modelled on how UTWC 26, the University of Toronto World Cup club — which I am a member of — actually recruited and ran its season: hiring into subteams rather than one general intake, a resume-plus-interview funnel with a consistent rubric, and accepted members landing directly on the work their subteam owns.
 
-**ClubRecruit is deployed for that club.** It has run their internal recruiting and hiring workflow over the past year and has processed 30+ applications through the resume-and-interview funnel, the review-and-accept pipeline and the season board.
+**ClubRecruit is deployed for that club.** It ran their internal recruiting and hiring workflow across the club's year, from September 2025 to April 2026 in the build-up to the 2026 World Cup, and processed 30+ applications through the resume-and-interview funnel, the review-and-accept pipeline and the season board.
 
-**This repository is the demo version of it.** The schema, data flow and end-to-end typing are the same as the deployment, but it is seeded with a fictional university, club, members and applicants rather than the club's real data, and the resume upload and interview recording steps are simulated (stored metadata plus sample content, no file storage or media pipeline). See [Limitations](#limitations).
+**This repository is the demo version of it.** The schema, data flow and end-to-end typing are the same as the deployment, but it is seeded with fictional members and applicants rather than the club's real data, and the resume upload and interview recording steps are simulated (stored metadata plus sample content, no file storage or media pipeline). The seed is a snapshot of that finished season, so its dates run from September 2025 to April 2026. See [Limitations](#limitations).
 
 ## Stack
 
@@ -22,7 +22,7 @@ The workflow is modelled on how the University of Toronto World Cup club — whi
 
 ## Demo accounts
 
-Password for every account is `clubrecruit`. All four belong to the University of Toronto; the seeded club is the UofT World Cup Club (`/clubs/worldcup`).
+Password for every account is `clubrecruit`. All four belong to the University of Toronto; the seeded club is UTWC 26, the University of Toronto World Cup Club (`/clubs/utwc26`).
 
 | Name | Role | Email |
 | --- | --- | --- |

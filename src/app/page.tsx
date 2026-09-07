@@ -79,8 +79,8 @@ export default function LandingPage() {
             <div className="eyebrow mb-2">See it in action</div>
             <h2 className="font-serif text-3xl sm:text-4xl">Four seats at one club.</h2>
             <p className="mt-3 text-sm leading-relaxed text-ink-3 sm:text-base">
-              The demo is seeded with the UofT World Cup Club, its open roles, a pipeline of applicants and a season-long
-              project plan. Log in as anyone below — the password is{" "}
+              The demo is seeded with UTWC 26, the University of Toronto World Cup Club: its roles, a pipeline of applicants and the
+              season-long project plan behind the 2026 tournament. Log in as anyone below — the password is{" "}
               <code className="rounded-sm bg-cream-3 px-1.5 py-0.5 font-mono text-[0.85em] text-ink">clubrecruit</code> for all of them.
             </p>
           </div>

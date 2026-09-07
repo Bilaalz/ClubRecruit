@@ -54,7 +54,7 @@ describe("isAllowedEmail", () => {
 describe("safeNext", () => {
   it("passes through same-origin relative paths", () => {
     expect(safeNext("/dashboard")).toBe("/dashboard");
-    expect(safeNext("/clubs/worldcup/board?workstream=w1")).toBe("/clubs/worldcup/board?workstream=w1");
+    expect(safeNext("/clubs/utwc26/board?workstream=w1")).toBe("/clubs/utwc26/board?workstream=w1");
   });
 
   it("falls back for open-redirect attempts", () => {
