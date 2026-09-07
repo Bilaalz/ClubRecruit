@@ -56,7 +56,7 @@ export function PostingForm({
       <FormNotice state={state} />
 
       <Field label="Title">
-        <Input name="title" defaultValue={values.title} placeholder="e.g. Software Developer — Autonomy" required maxLength={120} aria-invalid={!!fe.title} />
+        <Input name="title" defaultValue={values.title} placeholder="e.g. Web Developer — Fixtures & Standings" required maxLength={120} aria-invalid={!!fe.title} />
         <FieldError message={fe.title} />
       </Field>
 
@@ -89,11 +89,11 @@ export function PostingForm({
 
       <div className="grid gap-5 md:grid-cols-2">
         <Field label="Requirements" hint="One per line.">
-          <Textarea name="requirements" defaultValue={values.requirements.join("\n")} rows={5} placeholder={"Comfortable in Python or C++\nAvailable ~8 hours/week"} />
+          <Textarea name="requirements" defaultValue={values.requirements.join("\n")} rows={5} placeholder={"Comfortable in JavaScript or TypeScript\nAvailable ~8 hours/week"} />
           <FieldError message={fe.requirements} />
         </Field>
         <Field label="Responsibilities" hint="One per line.">
-          <Textarea name="responsibilities" defaultValue={values.responsibilities.join("\n")} rows={5} placeholder={"Own one module of the stack\nJoin weekly syncs"} />
+          <Textarea name="responsibilities" defaultValue={values.responsibilities.join("\n")} rows={5} placeholder={"Own one part of the platform\nJoin weekly syncs"} />
           <FieldError message={fe.responsibilities} />
         </Field>
       </div>

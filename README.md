@@ -6,7 +6,9 @@ ClubRecruit is a recruiting and team-operations platform for university clubs. A
 
 The workflow is modelled on how the University of Toronto World Cup club — which I am a member of — actually recruits and runs a season: hiring into subteams rather than one general intake, a resume-plus-interview funnel with a consistent rubric, and accepted members landing directly on the work their subteam owns.
 
-**The repository itself is purely a demo.** It is not deployed and has never run that club's recruiting. The database, schema and data flow are real and the whole app is typed end to end, but the seeded university, club, members and applicants are fictional, and the resume upload and interview recording steps are simulated (stored metadata plus sample content, no file storage or media pipeline). See [Limitations](#limitations).
+**ClubRecruit is deployed for that club.** It has run their internal recruiting and hiring workflow over the past year and has processed 30+ applications through the resume-and-interview funnel, the review-and-accept pipeline and the season board.
+
+**This repository is the demo version of it.** The schema, data flow and end-to-end typing are the same as the deployment, but it is seeded with a fictional university, club, members and applicants rather than the club's real data, and the resume upload and interview recording steps are simulated (stored metadata plus sample content, no file storage or media pipeline). See [Limitations](#limitations).
 
 ## Stack
 
@@ -20,12 +22,12 @@ The workflow is modelled on how the University of Toronto World Cup club — whi
 
 ## Demo accounts
 
-Password for every account is `clubrecruit`. All four belong to the University of Toronto; the seeded club is the UofT Robotics Association (`/clubs/utra`).
+Password for every account is `clubrecruit`. All four belong to the University of Toronto; the seeded club is the UofT World Cup Club (`/clubs/worldcup`).
 
 | Name | Role | Email |
 | --- | --- | --- |
 | Priya Sharma | Club owner — reviews the pipeline, accepts applicants, edits the plan | `priya@utoronto.ca` |
-| Marcus Lee | Software lead — works the board and project flow | `marcus@utoronto.ca` |
+| Marcus Lee | Technology lead — works the board and project flow | `marcus@utoronto.ca` |
 | Aisha Rahman | Applicant — has applied and finished her interview | `aisha@mail.utoronto.ca` |
 | Taylor Nguyen | New student — no club yet, applies from scratch | `newstudent@mail.utoronto.ca` |
 
@@ -110,7 +112,7 @@ Conventions that hold throughout:
 
 ## Limitations
 
-Known and deliberate, given the demo scope:
+Known and deliberate, and scoped to this demo build:
 
 - **Uploads and recordings are simulated.** `Resume` and `Interview` rows hold metadata, extracted text and a transcript; no file is stored and no audio is processed.
 - **Not production-hardened auth.** Sessions are a `Session` table plus an HTTP-only, `sameSite: lax` cookie, and passwords are bcrypt-hashed — but there is no rate limiting, email verification, password reset or CSRF token.

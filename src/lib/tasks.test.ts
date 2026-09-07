@@ -6,15 +6,15 @@ const row = {
   clubId: "c1",
   workstreamId: "w1",
   assigneeId: "m1",
-  title: "Costmap + Nav2 config in simulation",
-  description: "Tune inflation radius against the gravel course.",
+  title: "Standings table with head-to-head tiebreakers",
+  description: "Check the tiebreak order against last season's final table.",
   status: "IN_PROGRESS" as const,
   priority: "HIGH" as const,
   order: 3,
   dueDate: new Date("2026-09-12T00:00:00.000Z"),
   createdAt: new Date("2026-09-01T00:00:00.000Z"),
   updatedAt: new Date("2026-09-02T00:00:00.000Z"),
-  workstream: { id: "w1", name: "Autonomy", subteam: { id: "s1", name: "Software", color: "#4A6B5A" } },
+  workstream: { id: "w1", name: "Registration & standings platform", subteam: { id: "s1", name: "Technology", color: "#4A6B5A" } },
   assignee: { id: "m1", user: { name: "Marcus Lee" } },
 };
 
@@ -22,13 +22,13 @@ describe("toBoardTask", () => {
   it("flattens a task row into the shape the board renders", () => {
     expect(toBoardTask(row)).toEqual({
       id: "t1",
-      title: "Costmap + Nav2 config in simulation",
-      description: "Tune inflation radius against the gravel course.",
+      title: "Standings table with head-to-head tiebreakers",
+      description: "Check the tiebreak order against last season's final table.",
       status: "IN_PROGRESS",
       priority: "HIGH",
       order: 3,
       dueDate: "2026-09-12T00:00:00.000Z",
-      workstream: { id: "w1", name: "Autonomy", subteam: { id: "s1", name: "Software", color: "#4A6B5A" } },
+      workstream: { id: "w1", name: "Registration & standings platform", subteam: { id: "s1", name: "Technology", color: "#4A6B5A" } },
       assignee: { id: "m1", name: "Marcus Lee" },
     });
   });

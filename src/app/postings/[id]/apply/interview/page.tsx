@@ -12,11 +12,11 @@ function themeFor(program: string | null, subteamName: string | null | undefined
   const p = (program ?? "").toLowerCase();
   const s = (subteamName ?? "").toLowerCase();
   if (!p) return "medium";
-  if (s === "software" && /computer|software/.test(p)) return "strong";
-  if (s === "mechanical" && /mechanical|mech/.test(p)) return "strong";
-  if (s === "electrical" && /electrical|computer engineering/.test(p)) return "strong";
-  if (s === "outreach" && /communication|media|arts|business/.test(p)) return "strong";
-  if (/engineering|computer|science/.test(p)) return "medium";
+  if (s === "technology" && /computer|software|engineering science/.test(p)) return "strong";
+  if (s === "operations" && /kinesiology|physical|industrial|management/.test(p)) return "strong";
+  if (s === "media" && /cinema|media|communication|art/.test(p)) return "strong";
+  if (s === "partnerships" && /commerce|business|management|communication|economics/.test(p)) return "strong";
+  if (/engineering|computer|science|commerce|management/.test(p)) return "medium";
   return "weak";
 }
 

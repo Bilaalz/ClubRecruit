@@ -4,30 +4,30 @@ import { RUBRIC_CRITERIA } from "./samples";
 import { EvaluationResultSchema, recommendationForScore, type EvaluationInput } from "./schema";
 
 const posting: EvaluationInput["posting"] = {
-  title: "Autonomy Software Developer",
-  clubName: "UofT Robotics Association",
-  subteamName: "Software",
-  description: "Work on the rover autonomy stack: perception, planning and control in ROS 2.",
-  requirements: ["Python or C++", "ROS 2 fundamentals", "Comfortable on the Linux command line"],
-  responsibilities: ["Write navigation nodes", "Test in simulation", "Support field testing"],
+  title: "Web Developer — Fixtures & Standings",
+  clubName: "UofT World Cup Club",
+  subteamName: "Technology",
+  description: "Work on the tournament platform: team registration, the fixture list and the live standings table.",
+  requirements: ["JavaScript or TypeScript", "React fundamentals", "Comfortable on the Linux command line"],
+  responsibilities: ["Build the standings table", "Test the fixture generator", "Support match day"],
 };
 
 const strong: EvaluationInput = {
   posting,
   applicant: { name: "Aisha Rahman", program: "Computer Science", year: 2 },
-  coverNote: "I want to work on the ROS 2 navigation stack with the software subteam.",
+  coverNote: "I want to work on the live standings table with the technology subteam.",
   resumeText: [
     "AISHA RAHMAN — BSc Computer Science, Year 2",
-    "- Built a ROS 2 line follower in C++ and Python on a Raspberry Pi 4",
-    "- Wrote a navigation node tested in simulation across 40 runs",
+    "- Built a five-a-side league site in TypeScript and React",
+    "- Wrote a fixture generator tested across 40 simulated seasons",
     "- Automated a Linux command line deploy that cut setup from 30 minutes to 4",
     "- Reviewed pull requests for a team of 6 students",
   ].join("\n"),
   transcript: [
-    { speaker: "Interviewer", text: "Tell me about a robotics project you worked on.", atSec: 0 },
+    { speaker: "Interviewer", text: "Tell me about a web project you worked on.", atSec: 0 },
     {
       speaker: "Candidate",
-      text: "We built a ROS 2 line follower last year. I owned the perception node in C++ and we tested it in simulation before field testing, which cut our debugging time by about 40 percent across 12 runs.",
+      text: "We built a five-a-side league site last year. I owned the standings table in TypeScript and we tested the fixture generator against the previous season before launch, which cut our debugging time by about 40 percent across 12 runs.",
       atSec: 8,
     },
     { speaker: "Interviewer", text: "How comfortable are you on Linux?", atSec: 60 },
@@ -45,7 +45,7 @@ const weak: EvaluationInput = {
   coverNote: null,
   resumeText: "TAYLOR NGUYEN — first year student. Interested in joining a club this year.",
   transcript: [
-    { speaker: "Interviewer", text: "Tell me about a robotics project you worked on.", atSec: 0 },
+    { speaker: "Interviewer", text: "Tell me about a web project you worked on.", atSec: 0 },
     { speaker: "Candidate", text: "Um, I guess I haven't really done one yet.", atSec: 6 },
     { speaker: "Interviewer", text: "Why do you want this role?", atSec: 30 },
     { speaker: "Candidate", text: "It would probably look good on my resume, I think.", atSec: 34 },
@@ -97,7 +97,7 @@ describe("mockEvaluate", () => {
   });
 
   it("names the posting requirements it found, and the ones it did not", () => {
-    expect(mockEvaluate(strong).strengths.join(" ")).toMatch(/Python|Ros|C\+\+/i);
+    expect(mockEvaluate(strong).strengths.join(" ")).toMatch(/TypeScript|JavaScript|React/i);
     expect(mockEvaluate(weak).concerns.join(" ")).toMatch(/no evidence of/i);
   });
 
@@ -159,7 +159,7 @@ describe("mockEvaluate — scoring invariants", () => {
   });
 
   it("does not reward repeating the same keyword", () => {
-    const stuffed = `${strong.resumeText}\n${"ROS 2 Python C++ ".repeat(50)}`;
+    const stuffed = `${strong.resumeText}\n${"TypeScript React JavaScript ".repeat(50)}`;
     const before = mockEvaluate(strong).overallScore;
     const after = mockEvaluate({ ...strong, resumeText: stuffed }).overallScore;
     expect(after).toBeLessThanOrEqual(before);

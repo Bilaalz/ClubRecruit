@@ -94,7 +94,7 @@ function AddSubteamForm({ club }: { club: ClubRef }) {
         <FormNotice state={state} />
       </div>
       <Field label="Name">
-        <Input name="name" placeholder="e.g. Firmware" required maxLength={40} aria-invalid={!!fe.name} />
+        <Input name="name" placeholder="e.g. Operations" required maxLength={40} aria-invalid={!!fe.name} />
         <FieldError message={fe.name} />
       </Field>
       <Field label="Description">

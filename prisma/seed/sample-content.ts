@@ -17,7 +17,7 @@ export const RUBRIC_CRITERIA = [
 ] as const;
 
 export const SAMPLE_RESUMES: Record<string, string> = {
-  software: `AISHA RAHMAN
+  technology: `AISHA RAHMAN
 aisha.rahman@mail.utoronto.ca · Toronto, ON · github.com/aisharahman
 
 EDUCATION
@@ -33,54 +33,55 @@ Teaching Assistant — CSC108 Intro to Programming (Fall 2025)
 - Ran weekly labs for 60 students; wrote autograder tests in Python
 
 PROJECTS
-Path-planning visualiser (TypeScript, Canvas) — A*, RRT and D* Lite side by side with step-through debugging
-ROS 2 line follower (C++, Python) — camera pipeline with OpenCV on a Raspberry Pi 4
+Five-a-side league site (Next.js, PostgreSQL) — team registration, fixture generator and a live standings table with tiebreakers
+Bracket visualiser (TypeScript, Canvas) — knockout draws with step-through what-if editing
 
 SKILLS
-TypeScript, Python, C++, ROS 2, OpenCV, Git, Linux, Docker, PostgreSQL`,
+TypeScript, JavaScript, React, Next.js, Python, Git, Linux, Docker, PostgreSQL`,
 
-  mechanical: `DANIEL OKAFOR
+  operations: `DANIEL OKAFOR
 daniel.okafor@mail.utoronto.ca · Toronto, ON
 
 EDUCATION
-University of Toronto — BASc Mechanical Engineering, Year 3 (expected 2027)
-Relevant courses: MIE243 Mechanical Engineering Design, MIE222 Mechanics of Solids, MIE313 Design of Mechanical Components
+University of Toronto — BKin Kinesiology & Physical Education, Year 3 (expected 2027)
+Relevant courses: KPE320 Sport Administration, KPE335 Coaching Theory, KPE260 Sport Psychology
 
 EXPERIENCE
-Design Engineering Intern — Magna International (Summer 2026)
-- Designed a fixture for a robotic welding cell in SolidWorks; reduced changeover time by 15 minutes
-- Ran FEA on bracket redesign, cut mass 22% while meeting a 3x safety factor
+Intramural League Coordinator — UofT Sport & Rec (2025–present)
+- Ran a 24-team five-a-side league: fixtures, pitch bookings, results and discipline records
+- Cut match start delays from 15 minutes to under 3 by briefing captains and referees the night before
 
-Machine Shop Assistant — UofT Myhal Fabrication Facility (2025–present)
-- Certified on manual mill, lathe, and waterjet; trained 30+ students
+Referee — Ontario Soccer, certified 2024
+- 60+ matches at youth and university level; trained 30+ new volunteers
 
 PROJECTS
-6-DOF robotic arm — designed and 3D printed all links, cycloidal gearboxes for joints 1–3
-Formula SAE suspension — analysed anti-dive geometry in MATLAB
+Summer knockout weekend — organised a 16-team tournament across 2 pitches with 12 volunteers
 
 SKILLS
-SolidWorks, Fusion 360, ANSYS, GD&T, FDM/SLA printing, CNC, MATLAB, basic Python`,
+Fixture scheduling, volunteer coordination, referee certification, first aid, Excel/Sheets, public speaking`,
 
-  electrical: `MEI-LIN CHEN
-meilin.chen@mail.utoronto.ca · Toronto, ON
+  media: `MEI-LIN CHEN
+meilin.chen@mail.utoronto.ca · Toronto, ON · vimeo.com/meilinchen
 
 EDUCATION
-University of Toronto — BASc Electrical Engineering, Year 2 (expected 2028)
-Relevant courses: ECE212 Circuit Analysis, ECE241 Digital Systems, ECE216 Signals and Systems
+University of Toronto — BA Cinema Studies, Year 2 (expected 2028)
+Relevant courses: CIN212 Film Production, CIN270 Documentary Forms
 
 EXPERIENCE
-Hardware Intern — Ecobee (Summer 2026)
-- Laid out a 4-layer sensor board in Altium; brought up firmware on STM32
-- Wrote I2C/SPI drivers in C for temperature and humidity sensors
+Videographer — The Varsity (2025–present)
+- Shot and cut same-night recaps for 30+ Varsity Blues matches, published within 6 hours of full time
+- Ran a two-camera match-day setup with one volunteer operator
+
+Production Assistant — Toronto Reel Asian Film Festival (Summer 2026)
 
 PROJECTS
-Custom BLDC motor controller — FOC on STM32G4, 48V/30A, designed power stage and gate drive
-Battery management board — 12S LiFePO4, cell balancing, CAN telemetry
+"Ninety Minutes" — 6-minute documentary on a campus five-a-side league, 40k views
+Weekly reel series — vertical 60-second match recaps, 12k views on average
 
 SKILLS
-Altium, KiCad, STM32, C, CAN, I2C/SPI, oscilloscope/logic analyser, soldering (SMD down to 0402), LTspice`,
+Premiere Pro, Final Cut, DaVinci Resolve, Sony A7 III, two-camera shoots, colour, sound, Lightroom`,
 
-  outreach: `JORDAN PATEL
+  partnerships: `JORDAN PATEL
 jordan.patel@mail.utoronto.ca · Toronto, ON
 
 EDUCATION
@@ -91,13 +92,13 @@ Marketing Coordinator — UofT Engineering Society (2025–present)
 - Grew Instagram from 2.1k to 6.8k followers in 8 months through a weekly reel series
 - Coordinated 12 sponsor relationships totalling $45k for orientation week
 
-Event Volunteer — Toronto Science Festival (2024, 2025)
+Event Volunteer — Toronto Sports Film Festival (2024, 2025)
 
 PROJECTS
-"Build Night" outreach series — planned 6 hands-on robotics workshops for 200+ high-school students
+Watch-party series — planned 6 screenings for 200+ students, including a 400-seat final
 
 SKILLS
-Canva, Figma, Adobe Premiere, Notion, sponsor outreach, event logistics, public speaking`,
+Canva, Figma, Notion, sponsor outreach, event logistics, public speaking`,
 
   generic: `TAYLOR NGUYEN
 taylor.nguyen@mail.utoronto.ca · Toronto, ON
@@ -119,22 +120,22 @@ Python (beginner), Excel, HTML/CSS, teamwork, fast learner`,
 /** Plausible candidate answers keyed by a rough theme; the apply flow picks one per question. */
 export const SAMPLE_ANSWERS: Record<string, string[]> = {
   strong: [
-    "Sure. Last summer I owned the internal dashboard end to end. The hard part wasn't the UI, it was that the event stream had duplicates and out-of-order arrivals, so I wrote a small reconciliation service with idempotency keys and a short replay window. It cut duplicate alerts by about thirty percent and the support team stopped paging us.",
-    "I'd start by asking what 'done' looks like for the team, then break it into a first vertical slice that touches every layer so we find integration problems early. I like writing the interface first, getting agreement, then filling in the implementation.",
-    "When I disagreed with my lead about the caching approach I wrote up both options with rough numbers in a one-pager. We ended up going with a hybrid. What I learned is that a concrete comparison beats arguing in a meeting.",
-    "Honestly the thing that excites me is the deadline. Competition teams ship real hardware on a real date, and I want to be on a team where my code runs on something that moves.",
+    "Sure. The one I'd point to is the five-a-side league I ran last year — twenty-four teams, two pitches, and everyone wanting to play at seven on a Thursday. The hard part wasn't the schedule, it was the corrections: results came in late, teams swapped players, and the table was wrong by Sunday. I rebuilt how we recorded a result so every change had one owner and one place to live, and by the end of the season the standings were right the same night.",
+    "I'd start by asking what 'done' looks like for the team, then take one match window end to end rather than half of everything — schedule it, run it, write down what broke. I like agreeing the handoffs with the other subteams first and filling in the details after.",
+    "When I disagreed with my lead about how to handle no-shows I wrote up both options with rough numbers in a one-pager. We ended up going with a hybrid. What I learned is that a concrete comparison beats arguing in a meeting.",
+    "Honestly the thing that excites me is the fixture list. There is a real date and a real crowd, and I want to be on a team where the thing I worked on is visible at kickoff.",
   ],
   medium: [
-    "I've mostly worked on course projects, but in CSC209 I built a shell in C with pipes and job control, which taught me a lot about debugging with gdb and valgrind. I'd like to apply that to something with real hardware.",
-    "I think I'd try to break the problem down into smaller pieces and look at what other teams have done. I'd probably ask a lot of questions in the first couple of weeks.",
+    "I've mostly done smaller things — I kept the roster and the ride-shares for my intramural team all season, and I've volunteered at a couple of tournament weekends. I'd like to do it properly rather than ad hoc.",
+    "I think I'd try to break the problem down into smaller pieces and look at how other leagues have done it. I'd probably ask a lot of questions in the first couple of weeks.",
     "In a group project one member wasn't contributing. I talked to them one on one and it turned out they were overloaded, so we re-split the work. It ended fine but we lost a week.",
-    "I want to join because I've seen the rover videos and it looks like the kind of project where you learn ten times faster than in class.",
+    "I want to join because I've been to the last two finals and it looks like the kind of thing where you learn ten times faster than in class.",
   ],
   weak: [
     "I haven't done much like that yet, but I'm a fast learner and I'm really motivated to figure it out.",
     "Um, I'd probably Google it and watch some tutorials, and then ask someone on the team if I got stuck.",
     "I usually work alone because I find it faster, but I know teams are important so I'm trying to get better at that.",
-    "I'm interested because it would look good on my resume and I want to meet people in engineering.",
+    "I'm interested because it would look good on my resume and I want to meet people on campus.",
   ],
 };
 

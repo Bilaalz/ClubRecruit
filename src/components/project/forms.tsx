@@ -62,13 +62,13 @@ function ProjectFields({ plan }: { plan?: ProjectPlan }) {
   return (
     <>
       <Field label="Project name">
-        <Input name="name" required maxLength={120} defaultValue={plan?.name ?? ""} placeholder="Mars Rover 2027" />
+        <Input name="name" required maxLength={120} defaultValue={plan?.name ?? ""} placeholder="World Cup 2027" />
       </Field>
       <Field label="Summary" hint="One paragraph: what are you building and where does it end up?">
         <Textarea name="summary" required maxLength={2000} defaultValue={plan?.summary ?? ""} />
       </Field>
       <Field label="Goals" hint="One goal per line.">
-        <Textarea name="goals" defaultValue={plan?.goals.join("\n") ?? ""} placeholder={"Place top 10 at URC 2027\nRover mass under 50 kg"} />
+        <Textarea name="goals" defaultValue={plan?.goals.join("\n") ?? ""} placeholder={"32 teams and 500+ registered players\nEvery match window kicks off on time"} />
       </Field>
       <Field label="Target date">
         <Input type="date" name="targetDate" defaultValue={toDateInput(plan?.targetDate)} className="max-w-xs" />
@@ -85,7 +85,7 @@ export function PhaseForm({ projectId, phase }: { projectId: string; phase?: Pla
       {phase ? <input type="hidden" name="phaseId" value={phase.id} /> : <input type="hidden" name="projectId" value={projectId} />}
       <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
         <Field label="Name">
-          <Input name="name" required maxLength={80} defaultValue={phase?.name ?? ""} placeholder="Detailed Design" />
+          <Input name="name" required maxLength={80} defaultValue={phase?.name ?? ""} placeholder="Teams & Partners" />
         </Field>
         {phase && (
           <Field label="Order" hint="Left to right">
@@ -94,7 +94,7 @@ export function PhaseForm({ projectId, phase }: { projectId: string; phase?: Pla
         )}
       </div>
       <Field label="Description">
-        <Input name="description" maxLength={300} defaultValue={phase?.description ?? ""} placeholder="CAD, schematics, design reviews." />
+        <Input name="description" maxLength={300} defaultValue={phase?.description ?? ""} placeholder="Registration, sponsorship, venues." />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Start date">
@@ -160,7 +160,7 @@ export function WorkstreamForm({
       {ws ? <input type="hidden" name="workstreamId" value={ws.id} /> : <input type="hidden" name="projectId" value={projectId} />}
       <div className="grid gap-4 sm:grid-cols-[1fr_6rem]">
         <Field label="Name">
-          <Input name="name" required maxLength={120} defaultValue={ws?.name ?? ""} placeholder="Chassis & suspension design" />
+          <Input name="name" required maxLength={120} defaultValue={ws?.name ?? ""} placeholder="Venues & fixture schedule" />
         </Field>
         <Field label="Order" hint="Top to bottom">
           <Input type="number" name="order" min={0} max={9999} defaultValue={ws?.order ?? ""} placeholder="auto" />

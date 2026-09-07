@@ -6,11 +6,11 @@ describe("parseTranscript", () => {
     expect(
       parseTranscript([
         { speaker: "Interviewer", text: "Tell me about a project.", atSec: 0 },
-        { speaker: "Candidate", text: "I built a rover chassis.", atSec: 12 },
+        { speaker: "Candidate", text: "I built a league standings page.", atSec: 12 },
       ]),
     ).toEqual([
       { speaker: "Interviewer", text: "Tell me about a project.", atSec: 0 },
-      { speaker: "Candidate", text: "I built a rover chassis.", atSec: 12 },
+      { speaker: "Candidate", text: "I built a league standings page.", atSec: 12 },
     ]);
   });
 

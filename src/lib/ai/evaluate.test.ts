@@ -15,19 +15,19 @@ const { MOCK_MODEL } = await import("./mock");
 
 const input: EvaluationInput = {
   posting: {
-    title: "Autonomy Software Developer",
-    clubName: "UofT Robotics Association",
-    subteamName: "Software",
-    description: "Work on the rover autonomy stack.",
-    requirements: ["Python or C++", "ROS 2 fundamentals"],
-    responsibilities: ["Write navigation nodes"],
+    title: "Web Developer — Fixtures & Standings",
+    clubName: "UofT World Cup Club",
+    subteamName: "Technology",
+    description: "Work on the tournament platform.",
+    requirements: ["JavaScript or TypeScript", "React fundamentals"],
+    responsibilities: ["Build the standings table"],
   },
   applicant: { name: "Aisha Rahman", program: "Computer Science", year: 2 },
   coverNote: null,
-  resumeText: "Built a ROS 2 line follower in C++ and Python. Tested navigation nodes in simulation across 40 runs.",
+  resumeText: "Built a five-a-side league site in TypeScript and React. Tested the fixture generator across 40 simulated seasons.",
   transcript: [
-    { speaker: "Interviewer", text: "Tell me about a robotics project.", atSec: 0 },
-    { speaker: "Candidate", text: "We built a line follower and I owned the perception node.", atSec: 8 },
+    { speaker: "Interviewer", text: "Tell me about a web project.", atSec: 0 },
+    { speaker: "Candidate", text: "We built a league site and I owned the standings table.", atSec: 8 },
   ],
 };
 
@@ -37,9 +37,9 @@ const claudeReply = (overrides: Record<string, unknown> = {}) => ({
   parsed_output: {
     overallScore: 82,
     recommendation: "STRONG_YES",
-    summary: "Directly relevant robotics experience.",
-    strengths: ["Owned a perception node."],
-    concerns: ["No CAN bus exposure."],
+    summary: "Directly relevant web experience.",
+    strengths: ["Owned a standings table."],
+    concerns: ["No payments exposure."],
     rubric: [...RUBRIC_CRITERIA].reverse().map((criterion) => ({ criterion, score: 4, note: "note" })),
   },
   ...overrides,
@@ -84,9 +84,9 @@ describe("runEvaluator — choosing an evaluator", () => {
     await runEvaluator(input);
 
     const prompt = parse.mock.calls[0][0].messages[0].content as string;
-    expect(prompt).toContain("Autonomy Software Developer");
-    expect(prompt).toContain("ROS 2 fundamentals");
-    expect(prompt).toContain("line follower");
+    expect(prompt).toContain("Web Developer — Fixtures & Standings");
+    expect(prompt).toContain("React fundamentals");
+    expect(prompt).toContain("five-a-side league site");
     expect(prompt).toContain("[0:08] Candidate:");
   });
 });

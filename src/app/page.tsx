@@ -24,8 +24,8 @@ const FEATURES = [
 ];
 
 const PERSONAS = [
-  { name: "Priya", role: "Club owner", email: "priya@utoronto.ca", blurb: "Runs UTRA. Reviews the pipeline, accepts applicants, edits the plan." },
-  { name: "Marcus", role: "Software lead", email: "marcus@utoronto.ca", blurb: "Leads a subteam. Lives on the board and the project flow." },
+  { name: "Priya", role: "Club owner", email: "priya@utoronto.ca", blurb: "Runs the club. Reviews the pipeline, accepts applicants, edits the plan." },
+  { name: "Marcus", role: "Technology lead", email: "marcus@utoronto.ca", blurb: "Leads a subteam. Lives on the board and the project flow." },
   { name: "Aisha", role: "Applicant", email: "aisha@mail.utoronto.ca", blurb: "Has applied and finished her interview. Waiting on a decision." },
   { name: "Taylor", role: "New student", email: "newstudent@mail.utoronto.ca", blurb: "Not in any club yet. Browses open roles and applies from scratch." },
 ];
@@ -79,7 +79,7 @@ export default function LandingPage() {
             <div className="eyebrow mb-2">See it in action</div>
             <h2 className="font-serif text-3xl sm:text-4xl">Four seats at one club.</h2>
             <p className="mt-3 text-sm leading-relaxed text-ink-3 sm:text-base">
-              The demo is seeded with the University of Toronto Robotics Association, its open roles, a pipeline of applicants and a term-long
+              The demo is seeded with the UofT World Cup Club, its open roles, a pipeline of applicants and a season-long
               project plan. Log in as anyone below — the password is{" "}
               <code className="rounded-sm bg-cream-3 px-1.5 py-0.5 font-mono text-[0.85em] text-ink">clubrecruit</code> for all of them.
             </p>

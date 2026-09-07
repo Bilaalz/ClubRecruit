@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import type { BoardWorkstream } from "./shared";
 
 /**
- * Per-workstream progress chips ("Autonomy 2/5"). Clicking a chip sets (or clears) the
+ * Per-workstream progress chips ("Ticketing 2/5"). Clicking a chip sets (or clears) the
  * workstream filter while keeping the "mine" filter. Server component: hrefs are computed here.
  */
 export function ProgressStrip({
